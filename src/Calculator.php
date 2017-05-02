@@ -21,7 +21,11 @@ class Calculator
 	public function applyOperator(Operator $operator)
 	{
 		$operand2 = $this->stack->pop();
+		if( empty( $operand2 ) )
+			$operand2 = new Operand(0);
 		$operand1 = $this->stack->pop();
+		if( empty( $operand1 ) )
+			$operand1 = $operand2;
 		$result = $operator->apply( $operand1, $operand2 );
 		$this->stack->push( $result );
 	}
