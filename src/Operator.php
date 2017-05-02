@@ -2,38 +2,21 @@
 
 namespace App;
 
-class Operator
+abstract class Operator
 {
-	protected static $valid_operators = [
-		'+',
-		'-',
-		'*',
-		'/',
-	];
-
-	public function __construct($operator)
+	public function __construct($symbol)
 	{
-		$this->operator = $operator;
+		$this->symbol = $symbol;
 	}
 
 	public function __toString()
 	{
-		return $this->operator;
+		return $this->symbol;
 	}
 
-	public function operate(Operand $o1, Operand $o2)
+	public function apply(Operand $o1, Operand $o2)
 	{
-		switch( $this->operator )
-		{
-			case '+': return $o1->getValue() + $o2->getValue();
-			case '-': return $o1->getValue() - $o2->getValue();
-			case '*': return $o1->getValue() * $o2->getValue();
-			case '/': return $o1->getValue() / $o2->getValue();
-		}
+		return new Operand( $this->operate($o1, $o2) );
 	}
-
-	public static function isValid($string)
-	{
-		return in_array( $string, static::$valid_operators );
-	}
+	public abstract function operate(Operand $o1, Operand $o2);
 }

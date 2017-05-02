@@ -20,6 +20,7 @@ class CalculatorTest extends TestCase
 		$calc->push("456");
 		$calc->push('*');
 		$this->assertEquals( 123 * 456, $calc->getValue() );
+		$this->assertEquals( 56088, $calc->getValue() );
 	}
 }
 

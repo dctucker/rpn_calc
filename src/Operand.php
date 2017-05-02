@@ -11,7 +11,7 @@ class Operand
 
 	public function __toString()
 	{
-		return $this->value;
+		return "".$this->value;
 	}
 
 	public function getValue()

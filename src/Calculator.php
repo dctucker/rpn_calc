@@ -9,11 +9,6 @@ class Calculator
 		$this->stack = $stack;
 	}
 
-	public function evaluate($string)
-	{
-		// @TODO
-	}
-
 	public function push($string)
 	{
 		$obj = $this->resolveObject($string);
@@ -25,9 +20,9 @@ class Calculator
 
 	public function applyOperator(Operator $operator)
 	{
-		$operand1 = $this->stack->pop();
 		$operand2 = $this->stack->pop();
-		$result = $operator->operate( $operand1, $operand2 );
+		$operand1 = $this->stack->pop();
+		$result = $operator->apply( $operand1, $operand2 );
 		$this->stack->push( $result );
 	}
 
@@ -35,14 +30,12 @@ class Calculator
 	{
 		if( Operand::isValid($string) )
 			return new Operand($string);
-		elseif( Operator::isValid($string) )
-			return new Operator($string);
 		else
-			throw new \Exception("Invalid type: ".$string);
+			return OperatorFactory::make($string);
 	}
 
 	public function getValue()
 	{
-		return $this->stack->peek();
+		return $this->stack->peek()->getValue();
 	}
 }

@@ -27,4 +27,9 @@ class Stack
 		$this->push($ret);
 		return $ret;
 	}
+
+	public function __toString()
+	{
+		return implode(' ', $this->stack);
+	}
 }
