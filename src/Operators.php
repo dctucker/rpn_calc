@@ -1,87 +1,188 @@
 <?php
 
 namespace App\Operators;
-use App\Operator;
-use App\Operand;
+use App\Operators\Operator;
+use App\Operands\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
 use App\OperandFactory;
+use App\OperatorFactory;
 
 trait AddComplex
 {
-	public function complex(Complex $o1, Complex $o2)
+	public function complex(Complex $o2, Complex $o1)
 	{
 		return [
-			$this->scalars( $o1->real, $o2->real ),
-			$this->scalars( $o1->imag, $o2->imag )
+			$this->scalar( $o1->real, $o2->real ),
+			$this->scalar( $o1->imag, $o2->imag )
 		];
 	}
-	public function scale(Complex $o1, Scalar $o2)
+
+	public function scale(Complex $c, Scalar $s)
 	{
-		$o1->real->operate( $this, $o2 );
-		return $o1;
+		return [
+			$this->scalar( $s, $c->real ),
+			$c->imag->value,
+		];
 	}
 }
 
-class PlusOp extends Operator
+class PlusOp extends BinaryOperator
 {
 	use AddComplex;
-	public function scalars(Scalar $o1, Scalar $o2)
+	public function scalar(Scalar $o2, Scalar $o1)
 	{
 		return $o1->getValue() + $o2->getValue();
 	}
 }
-class MinusOp extends Operator
+class MinusOp extends BinaryOperator
 {
 	use AddComplex;
-	public function scalars(Scalar $o1, Scalar $o2)
+	public function scalar(Scalar $o2, Scalar $o1)
 	{
 		return $o1->getValue() - $o2->getValue();
 	}
 }
-class TimesOp extends Operator
+
+trait ScaleComplex
 {
-	public function scalars(Scalar $o1, Scalar $o2)
+	public function scale(Complex $c, Scalar $s)
+	{
+		return [
+			$this->scalar( $s, $c->real ),
+			$this->scalar( $s, $c->imag )
+		];
+	}
+}
+
+class TimesOp extends BinaryOperator
+{
+	use ScaleComplex;
+	public function scalar(Scalar $o2, Scalar $o1)
 	{
 		return $o1->getValue() * $o2->getValue();
 	}
-	public function complex(Complex $o1, Complex $o2)
+	public function complex(Complex $c2, Complex $c1)
 	{
-		$ac = $this->scalars( $o1->real, $o2->real );
-		$bd = $this->scalars( $o1->imag, $o2->imag );
-		$ad = $this->scalars( $o1->real, $o2->imag );
-		$bc = $this->scalars( $o1->imag, $o2->real );
+		$ac = $this->scalar( $c1->real, $c2->real );
+		$bd = $this->scalar( $c1->imag, $c2->imag );
+		$ad = $this->scalar( $c1->real, $c2->imag );
+		$bc = $this->scalar( $c1->imag, $c2->real );
 		return [
 			$ac - $bd ,
 			$ad + $bc ,
 		];
 	}
-	public function scale(Complex $o1, Scalar $o2)
-	{
-		$o1->real->operate( $this, $o2 );
-		$o1->imag->operate( $this, $o2 );
-		return $o1;
-	}
 }
-class DivideOp extends Operator
+class DivideOp extends BinaryOperator
 {
-	public function scalars(Scalar $o1, Scalar $o2)
+	use ScaleComplex;
+	public function scalar(Scalar $o2, Scalar $o1)
 	{
 		return $o1->getValue() / $o2->getValue();
 	}
-}
-class PowerOp extends Operator
-{
-	public function scalars(Scalar $o1, Scalar $o2)
+
+	public function complex(Complex $c2, Complex $c1)
 	{
-		return pow($o1->getValue(), $o2->getValue());
+		$ac = $c1->real->getValue() * $c2->real->getValue();
+		$bc = $c1->imag->getValue() * $c2->real->getValue();
+		$ad = $c1->real->getValue() * $c2->imag->getValue();
+		$bd = $c1->imag->getValue() * $c2->imag->getValue();
+		$cc = $c2->real->getValue(); $cc *= $cc;
+		$dd = $c2->imag->getValue(); $dd *= $dd;
+		return [
+			( $ac + $bd ) / ( $cc + $dd ),
+			( $bc + $ad ) / ( $cc + $dd ),
+		];
 	}
 }
-class SqrtOp extends PowerOp
+class PowerOp extends BinaryOperator
 {
-	public $num_operands = 1;
-	public function apply($operand)
+	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return OperandFactory::make( sqrt($operand->current()->getValue()) );
+		return pow($o2->getValue(), $o1->getValue());
+	}
+	public function scale(Complex $o2, Scalar $o1)
+	{
+		$mag = pow( $o2->mag(), $o1->getValue() );
+		$arg = $o2->arg();
+		return [
+			$mag * cos( $o1->getValue() * $arg ),
+			$mag * sin( $o1->getValue() * $arg ),
+		];
+	}
+}
+class SqrtOp extends UnaryOperator
+{
+	public function scalar(Scalar $o)
+	{
+		return sqrt( $o->getValue() );
+	}
+}
+
+abstract class TrigOperator extends UnaryOperator
+{
+}
+
+class SinOp extends TrigOperator
+{
+	public function scalar(Scalar $o)
+	{
+		return sin( $o->getValue() );
+	}
+
+	public function complex(Complex $o)
+	{
+		return [
+			sin( $o->real->getValue() ) * cosh( $o->imag->getValue() ),
+			cos( $o->real->getValue() ) * sinh( $o->imag->getValue() )
+		];
+	}
+}
+class CosOp extends TrigOperator
+{
+	public function scalar(Scalar $o)
+	{
+		return cos( $o->getValue() );
+	}
+	public function complex(Complex $o)
+	{
+		return [
+			  cos( $o->real->getValue() ) * cosh( $o->imag->getValue() ),
+			- sin( $o->real->getValue() ) * sinh( $o->imag->getValue() )
+		];
+	}
+}
+class TanOp extends TrigOperator
+{
+	public function __construct()
+	{
+		$this->cos = OperatorFactory::make('cos');
+		$this->sin = OperatorFactory::make('sin');
+		$this->div = OperatorFactory::make('/');
+	}
+	public function scalar(Scalar $o)
+	{
+		return tan( $o->getValue() );
+	}
+	public function complex(Complex $o)
+	{
+		$components = [ ($this->cos)($o), ($this->sin)($o) ];
+		return ($this->div)( $components );
+	}
+}
+
+class MagOp extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return abs( $s->getValue() );
+	}
+	public function complex(Complex $c)
+	{
+		return [
+			$c->mag(),
+			0
+		];
 	}
 }

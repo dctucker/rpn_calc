@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Operands\Operand;
+use App\Operators\Operator;
+
 class Calculator
 {
 	public function __construct(Stack $stack)
@@ -22,7 +25,7 @@ class Calculator
 	public function applyOperator(Operator $operator)
 	{
 		$operands = $this->stack->pop( $operator->num_operands );
-		$result = $operator->apply( $operands );
+		$result = $operator( $operands );
 		$this->stack->push( $result );
 	}
 

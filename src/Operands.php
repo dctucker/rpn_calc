@@ -2,8 +2,7 @@
 
 namespace App\Operands;
 
-use App\Operand;
-use App\Operator;
+use App\Operators\Operator;
 
 class Scalar extends Operand
 {
@@ -23,23 +22,21 @@ class Scalar extends Operand
 		return $this->value > 0 ? '+' : '-';
 	}
 
-	public function mag()
-	{
-		return abs($this->value);
-	}
-
 	public function __toString()
 	{
 		return "".$this->value;
 	}
 
-	public function operate(Operator $op, $other)
+	public function operate(Operator $op, $other = null)
 	{
+		if( $op->num_operands == 1 )
+			return $op->scalar( $this );
+
 		if( $other instanceof Complex )
 			return $other->operate( $op, $this );
 
 		assert( $other instanceof Scalar );
-		$this->value = $op->scalars( $this, $other );
+		$this->value = $op->scalar( $this, $other );
 		return $this;
 	}
 }
@@ -91,6 +88,8 @@ class Complex extends Operand
 
 	public function __toString()
 	{
+		return $this->real .','. $this->imag . 'i';
+
 		if( $this->real == '0' )
 		{
 			if( $this->imag == '1' )
@@ -101,27 +100,48 @@ class Complex extends Operand
 				return $this->imag."i";
 		}
 	
-		$str = $this->real;
-		if( $this->imag->value == 1 )
+		$str = "".$this->real;
+		if( $this->imag == '1' )
 			$str .= "+i";
-		elseif( $this->imag->value != 0 )
-			$str .= $this->imag->sign().$this->imag->mag()."i";
+		elseif( $this->imag != '0' )
+			$str .= $this->imag->sign().abs( $this->imag->getValue() )."i";
 		return $str;
 	}
 
-	public function operate( Operator $op, $other )
+	public function mag()
 	{
-		if( $other instanceof Complex )
+		return sqrt( pow( $this->real->getValue(), 2 ) + pow( $this->imag->getValue(), 2 ) );
+	}
+
+	public function arg()
+	{
+		return atan2( $this->imag->getValue(), $this->real->getValue() );
+	}
+
+	public function operate( Operator $op, $other = null )
+	{
+		if( $op->num_operands == 1 )
+		{
+			$complex = $op->complex( $this );
+		}
+		elseif( $other instanceof Complex )
 		{
 			$complex = $op->complex( $this, $other );
-			$this->real->value = $complex[0];
-			$this->imag->value = $complex[1];
 		}
 		elseif( $other instanceof Scalar )
 		{
-			// @TODO
 			$complex = $op->scale( $this, $other );
 		}
+		else
+		{
+			throw new \Exception("unrecognized operand");
+		}
+
+		$this->real->value = $complex[0];
+		$this->imag->value = $complex[1];
+
+		if( $this->imag->getValue() == 0 )
+			return $this->real;
 
 		return $this;
 	}
