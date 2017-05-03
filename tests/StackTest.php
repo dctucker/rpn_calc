@@ -14,7 +14,7 @@ class StackTest extends TestCase
 	{
 		$a = 'A';
 		$this->stack->push($a);
-		$b = $this->stack->pop();
+		$b = $this->stack->pop()->current();
 		$this->assertEquals($b, $a);
 	}
 }

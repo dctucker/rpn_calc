@@ -1,13 +1,13 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use App\Operand;
+use App\OperandFactory;
 
 class OperandTest extends TestCase
 {
 	public function testCreateOperand()
 	{
-		$operand = new Operand('123');
+		$operand = OperandFactory::make('123');
 		$this->assertEquals('123', $operand);
 	}
 }
