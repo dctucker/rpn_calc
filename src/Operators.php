@@ -1,12 +1,48 @@
 <?php
 
 namespace App\Operators;
-use App\Operators\Operator;
-use App\Operands\Operand;
+
+use App\OperatorFactory;
+use App\Operator;
+use App\OperandFactory;
+use App\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
-use App\OperandFactory;
-use App\OperatorFactory;
+
+abstract class UnaryOperator extends Operator
+{
+	public $num_operands = 1;
+	public abstract function scalar(Scalar $o1);
+
+	public function __invoke($operand)
+	{
+		if( ! $operand instanceof \Generator )
+			$operand = $this->generate( $operand );
+		
+		$ret = $operand->current();
+		$ret = $ret->operate( $this );
+
+		return $ret;
+	}
+}
+
+abstract class BinaryOperator extends Operator
+{
+	public $num_operands = 2;
+	public abstract function scalar(Scalar $o1, Scalar $o2);
+
+	public function __invoke($operands)
+	{
+		if( ! $operands instanceof \Generator )
+			$operands = $this->generate( $operands );
+
+		$ret = $operands->current();
+		for( $operands->next(); $operands->valid(); $operands->next() )
+			$ret = $ret->operate( $this, $operands->current() );
+
+		return $ret;
+	}
+}
 
 trait AddComplex
 {
@@ -22,25 +58,25 @@ trait AddComplex
 	{
 		return [
 			$this->scalar( $s, $c->real ),
-			$c->imag->value,
+			($c->imag)(),
 		];
 	}
 }
 
-class PlusOp extends BinaryOperator
+class Plus extends BinaryOperator
 {
 	use AddComplex;
 	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return $o1->getValue() + $o2->getValue();
+		return $o1() + $o2();
 	}
 }
-class MinusOp extends BinaryOperator
+class Minus extends BinaryOperator
 {
 	use AddComplex;
 	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return $o1->getValue() - $o2->getValue();
+		return $o1() - $o2();
 	}
 }
 
@@ -55,12 +91,12 @@ trait ScaleComplex
 	}
 }
 
-class TimesOp extends BinaryOperator
+class Times extends BinaryOperator
 {
 	use ScaleComplex;
 	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return $o1->getValue() * $o2->getValue();
+		return $o1() * $o2();
 	}
 	public function complex(Complex $c2, Complex $c1)
 	{
@@ -74,49 +110,82 @@ class TimesOp extends BinaryOperator
 		];
 	}
 }
-class DivideOp extends BinaryOperator
+class Divide extends BinaryOperator
 {
 	use ScaleComplex;
 	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return $o1->getValue() / $o2->getValue();
+		return $o1() / $o2();
 	}
 
 	public function complex(Complex $c2, Complex $c1)
 	{
-		$ac = $c1->real->getValue() * $c2->real->getValue();
-		$bc = $c1->imag->getValue() * $c2->real->getValue();
-		$ad = $c1->real->getValue() * $c2->imag->getValue();
-		$bd = $c1->imag->getValue() * $c2->imag->getValue();
-		$cc = $c2->real->getValue(); $cc *= $cc;
-		$dd = $c2->imag->getValue(); $dd *= $dd;
+		$ac = ($c1->real)() * ($c2->real)();
+		$bc = ($c1->imag)() * ($c2->real)();
+		$ad = ($c1->real)() * ($c2->imag)();
+		$bd = ($c1->imag)() * ($c2->imag)();
+		$cc = ($c2->real)(); $cc *= $cc;
+		$dd = ($c2->imag)(); $dd *= $dd;
 		return [
 			( $ac + $bd ) / ( $cc + $dd ),
 			( $bc + $ad ) / ( $cc + $dd ),
 		];
 	}
 }
-class PowerOp extends BinaryOperator
+class Power extends BinaryOperator
 {
 	public function scalar(Scalar $o2, Scalar $o1)
 	{
-		return pow($o2->getValue(), $o1->getValue());
+		return pow($o1(), $o2()); // y^x, not x^y
 	}
 	public function scale(Complex $o2, Scalar $o1)
 	{
-		$mag = pow( $o2->mag(), $o1->getValue() );
+		$mag = pow( $o2->mag(), $o1() );
 		$arg = $o2->arg();
 		return [
-			$mag * cos( $o1->getValue() * $arg ),
-			$mag * sin( $o1->getValue() * $arg ),
+			$mag * cos( $o1() * $arg ),
+			$mag * sin( $o1() * $arg ),
 		];
 	}
 }
-class SqrtOp extends UnaryOperator
+class Sqrt extends UnaryOperator
 {
 	public function scalar(Scalar $o)
 	{
-		return sqrt( $o->getValue() );
+		return sqrt( $o() );
+	}
+}
+
+class Reciprocal extends UnaryOperator
+{
+	public function scalar(Scalar $o)
+	{
+		return 1 / $o();
+	}
+	public function complex(Complex $o)
+	{
+		$xx = ($o->real)(); $xx *= $xx;
+		$yy = ($o->imag)(); $yy *= $yy;
+		return [
+			  ($o->real)() / ( $xx + $yy ),
+			- ($o->imag)() / ( $xx + $yy )
+		];
+	}
+}
+
+class Ln extends UnaryOperator
+{
+	public function scalar(Scalar $o)
+	{
+		return log( $o() );
+	}
+}
+
+class NthLog extends BinaryOperator
+{
+	public function scalar(Scalar $s2, Scalar $s1)
+	{
+		return log( $s1(), $s2() );
 	}
 }
 
@@ -124,36 +193,36 @@ abstract class TrigOperator extends UnaryOperator
 {
 }
 
-class SinOp extends TrigOperator
+class Sin extends TrigOperator
 {
 	public function scalar(Scalar $o)
 	{
-		return sin( $o->getValue() );
+		return sin( $o() );
 	}
 
 	public function complex(Complex $o)
 	{
 		return [
-			sin( $o->real->getValue() ) * cosh( $o->imag->getValue() ),
-			cos( $o->real->getValue() ) * sinh( $o->imag->getValue() )
+			sin( ($o->real)() ) * cosh( ($o->imag)() ),
+			cos( ($o->real)() ) * sinh( ($o->imag)() )
 		];
 	}
 }
-class CosOp extends TrigOperator
+class Cos extends TrigOperator
 {
 	public function scalar(Scalar $o)
 	{
-		return cos( $o->getValue() );
+		return cos( $o() );
 	}
 	public function complex(Complex $o)
 	{
 		return [
-			  cos( $o->real->getValue() ) * cosh( $o->imag->getValue() ),
-			- sin( $o->real->getValue() ) * sinh( $o->imag->getValue() )
+			  cos( ($o->real)() ) * cosh( ($o->imag)() ),
+			- sin( ($o->real)() ) * sinh( ($o->imag)() )
 		];
 	}
 }
-class TanOp extends TrigOperator
+class Tan extends TrigOperator
 {
 	public function __construct()
 	{
@@ -163,7 +232,7 @@ class TanOp extends TrigOperator
 	}
 	public function scalar(Scalar $o)
 	{
-		return tan( $o->getValue() );
+		return tan( $o() );
 	}
 	public function complex(Complex $o)
 	{
@@ -172,17 +241,47 @@ class TanOp extends TrigOperator
 	}
 }
 
-class MagOp extends UnaryOperator
+class Mag extends UnaryOperator
 {
 	public function scalar(Scalar $s)
 	{
-		return abs( $s->getValue() );
+		return abs( $s() );
 	}
 	public function complex(Complex $c)
 	{
 		return [
 			$c->mag(),
 			0
+		];
+	}
+}
+
+class Arg extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return atan2( 0, $s() );
+	}
+	public function complex(Complex $c)
+	{
+		return [
+			$c->arg(),
+			0
+		];
+	}
+}
+
+class Conj extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return $s();
+	}
+	public function complex(Complex $c)
+	{
+		return [
+			  $c->real(),
+			- $c->imag()
 		];
 	}
 }

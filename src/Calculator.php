@@ -2,8 +2,8 @@
 
 namespace App;
 
-use App\Operands\Operand;
-use App\Operators\Operator;
+use App\Operand;
+use App\Operator;
 
 class Calculator
 {

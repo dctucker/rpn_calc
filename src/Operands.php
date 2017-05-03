@@ -2,29 +2,19 @@
 
 namespace App\Operands;
 
-use App\Operators\Operator;
+use App\Operand;
+use App\Operator;
 
 class Scalar extends Operand
 {
-	public $value;
-	public function __construct($value)
-	{
-		$this->value = $value;
-	}
-
 	public function getValue()
 	{
-		return $this->value;
+		return $this->symbol;
 	}
 
 	public function sign()
 	{
-		return $this->value > 0 ? '+' : '-';
-	}
-
-	public function __toString()
-	{
-		return "".$this->value;
+		return $this->getValue() > 0 ? '+' : '-';
 	}
 
 	public function operate(Operator $op, $other = null)
@@ -36,7 +26,7 @@ class Scalar extends Operand
 			return $other->operate( $op, $this );
 
 		assert( $other instanceof Scalar );
-		$this->value = $op->scalar( $this, $other );
+		$this->symbol = $op->scalar( $this, $other );
 		return $this;
 	}
 }
@@ -86,9 +76,14 @@ class Complex extends Operand
 		$this->imag = new Scalar(1);
 	}
 
+	public function getValue()
+	{
+		return [ $this->real->getValue(), $this->imag->getValue() ];
+	}
+
 	public function __toString()
 	{
-		return $this->real .','. $this->imag . 'i';
+		//return $this->real .','. $this->imag . 'i';
 
 		if( $this->real == '0' )
 		{
@@ -137,8 +132,8 @@ class Complex extends Operand
 			throw new \Exception("unrecognized operand");
 		}
 
-		$this->real->value = $complex[0];
-		$this->imag->value = $complex[1];
+		$this->real->symbol = $complex[0];
+		$this->imag->symbol = $complex[1];
 
 		if( $this->imag->getValue() == 0 )
 			return $this->real;

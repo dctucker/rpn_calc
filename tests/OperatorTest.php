@@ -9,5 +9,8 @@ class OperatorTest extends TestCase
 	{
 		$operator = OperatorFactory::make('+');
 		$this->assertEquals('+', $operator);
+
+		$operator = OperatorFactory::make('ln');
+		$this->assertEquals('ln', $operator);
 	}
 }

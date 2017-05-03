@@ -22,6 +22,12 @@ if( $arg == '-v' )
 	$parser->verbose = true;
 	$arg = array_shift( $argv );
 }
+elseif( $arg == '-h' )
+{
+	echo "Operators: ".App\OperatorFactory::reference()."\n";
+	echo "Operands:  ".App\OperandFactory::reference()."\n";
+	return;
+}
 
 if( empty( $arg ) )
 	return usage();

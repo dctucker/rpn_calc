@@ -9,5 +9,8 @@ class OperandTest extends TestCase
 	{
 		$operand = OperandFactory::make('123');
 		$this->assertEquals('123', $operand);
+
+		$operand = OperandFactory::make('pi');
+		$this->assertEquals(M_PI, $operand->getValue());
 	}
 }
