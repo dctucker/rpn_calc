@@ -8,12 +8,13 @@ class Stack
 
 	public function push($input)
 	{
-		return array_unshift( $this->stack, $input );
+		return array_push( $this->stack, $input );
 	}
 
-	public function pop()
+	public function pop($n = 1)
 	{
-		return array_shift( $this->stack );
+		for( $i = 0; $i < $n; $i++ )
+			yield array_pop( $this->stack );
 	}
 
 	public function all()
@@ -23,9 +24,7 @@ class Stack
 
 	public function peek()
 	{
-		$ret = $this->pop();
-		$this->push($ret);
-		return $ret;
+		return end( $this->stack );
 	}
 
 	public function __toString()

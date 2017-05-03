@@ -15,12 +15,16 @@ class Parser
 		if( is_string( $tokens ) )
 			$tokens = explode(' ', $tokens);
 
+		echo implode(' ', $tokens)."\n";
+
 		foreach( $tokens as $token )
 		{
-			$this->calculator->push( trim($token) );
+			$obj = $this->calculator->push( trim($token) );
 			if( $this->verbose )
 			{
-				echo "STACK: ".$this->calculator->stack."\n";
+				echo "$obj\t";
+				echo "STACK: ".$this->calculator->stack;
+				echo "\n";
 			}
 		}
 	}

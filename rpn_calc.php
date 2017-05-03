@@ -27,5 +27,5 @@ if( empty( $arg ) )
 	return usage();
 
 $parser->parse( $arg );
-echo $calc->getValue();
+echo $calc->display();
 echo "\n";

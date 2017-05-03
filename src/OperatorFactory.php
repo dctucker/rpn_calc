@@ -10,6 +10,7 @@ class OperatorFactory
 		'*'=>'times',
 		'/'=>'divide',
 		'^'=>'power',
+		'sqrt'=>'sqrt',
 	];
 
 	public static function make($string)
@@ -19,7 +20,7 @@ class OperatorFactory
 
 		$name = static::$valid_operators[ $string ];
 		$class = "App\\Operators\\".ucfirst($name)."Op";
-		return new $class($string);;
+		return new $class($string);
 	}
 
 	public static function isValid($string)

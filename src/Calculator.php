@@ -16,30 +16,26 @@ class Calculator
 			$this->applyOperator( $obj );
 		elseif( $obj instanceof Operand )
 			$this->stack->push( $obj );
+		return $obj;
 	}
 
 	public function applyOperator(Operator $operator)
 	{
-		$operand2 = $this->stack->pop();
-		if( empty( $operand2 ) )
-			$operand2 = new Operand(0);
-		$operand1 = $this->stack->pop();
-		if( empty( $operand1 ) )
-			$operand1 = $operand2;
-		$result = $operator->apply( $operand1, $operand2 );
+		$operands = $this->stack->pop( $operator->num_operands );
+		$result = $operator->apply( $operands );
 		$this->stack->push( $result );
 	}
 
 	public function resolveObject($string)
 	{
-		if( Operand::isValid($string) )
-			return new Operand($string);
+		if( OperandFactory::isValid($string) )
+			return OperandFactory::make($string);
 		else
 			return OperatorFactory::make($string);
 	}
 
-	public function getValue()
+	public function display()
 	{
-		return $this->stack->peek()->getValue();
+		return "".$this->stack->peek();
 	}
 }

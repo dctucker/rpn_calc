@@ -2,8 +2,13 @@
 
 namespace App;
 
+use App\OperandFactory;
+use App\Operands\Scalar;
+
 abstract class Operator
 {
+	public $identity;
+	public $num_operands = 2;
 	public function __construct($symbol)
 	{
 		$this->symbol = $symbol;
@@ -14,9 +19,13 @@ abstract class Operator
 		return $this->symbol;
 	}
 
-	public function apply(Operand $o1, Operand $o2)
+	public function apply($operands)
 	{
-		return new Operand( $this->operate($o1, $o2) );
+		$ret = $operands->current();
+		for( $operands->next(); $operands->valid(); $operands->next() )
+			$ret = $ret->operate( $this, $operands->current() );
+
+		return $ret;
 	}
-	public abstract function operate(Operand $o1, Operand $o2);
+	public abstract function scalars(Scalar $o1, Scalar $o2);
 }
