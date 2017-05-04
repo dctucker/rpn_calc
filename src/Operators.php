@@ -32,8 +32,8 @@ abstract class UnaryOperator extends Operator implements UnaryScalar
 		$operands = $this->generate( $operands );
 		
 		$ret = $operands->current();
-		$ret = $ret->operate( $this );
-
+		if( $operands->valid() )
+			$ret = $ret->operate( $this );
 		return $ret;
 	}
 }
@@ -53,15 +53,12 @@ abstract class BinaryOperator extends Operator implements BinaryScalar
 
 		$ret = $operands->current();
 		for( $operands->next(); $operands->valid(); $operands->next() )
-		{
 			$ret = $ret->operate( $this, $operands->current() );
-		}
-
 		return $ret;
 	}
 }
 
-// stack functions
+// stack operations
 
 class Pop extends Operator implements StackOperator
 {

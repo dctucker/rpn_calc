@@ -25,8 +25,8 @@ if( $arg[0] == '-' )
 	}
 	if( strpos($arg, 'h') !== false )
 	{
-		echo "Operators: ".App\OperatorFactory::reference()."\n";
-		echo "Operands:  ".App\OperandFactory::reference()."\n";
+		echo "Operators: ".implode(' ', App\OperatorFactory::reference() )."\n";
+		echo "Operands:  ".implode(' ',  App\OperandFactory::reference() )."\n";
 		return;
 	}
 	if( strpos($arg, 'v') !== false )

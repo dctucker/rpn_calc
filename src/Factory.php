@@ -58,7 +58,7 @@ abstract class SymbolFactory implements Factory
 	 */
 	public static function reference()
 	{
-		return implode(' ', array_keys( static::$valids ));
+		return array_keys( static::$valids );
 	}
 }
 
@@ -84,8 +84,8 @@ class OperatorFactory extends SymbolFactory
 		'conj'=>'conj',
 		'pop'=>'pop',
 		'swap'=>'swap',
-		'<<'=>'rotateL',
-		'>>'=>'rotateR',
+		//'<<'=>'rotateL',
+		//'>>'=>'rotateR',
 	];
 }
 

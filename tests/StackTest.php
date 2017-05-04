@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use App\Stack;
+use App\GeneratorStack as Stack;
 
 class StackTest extends TestCase
 {

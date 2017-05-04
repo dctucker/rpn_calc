@@ -11,6 +11,18 @@ class OperandTest extends TestCase
 		$this->assertEquals('123', $operand);
 
 		$operand = OperandFactory::make('pi');
-		$this->assertEquals(M_PI, $operand->getValue());
+		$this->assertEquals(M_PI, $operand());
+
+		$operand = OperandFactory::make('e');
+		$this->assertEquals(M_E, $operand());
+
+		$operand = OperandFactory::make('nan');
+		$this->assertNan($operand());
+
+		$operand = OperandFactory::make('+inf');
+		$this->assertEquals(INF, $operand());
+
+		$operand = OperandFactory::make('-inf');
+		$this->assertEquals(-INF, $operand());
 	}
 }
