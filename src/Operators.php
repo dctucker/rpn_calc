@@ -245,7 +245,7 @@ class Power extends BinaryOperator implements BinaryComplexScalar
 		];
 	}
 }
-class Sqrt extends UnaryOperator // @TODO implements UnaryComplex
+class Sqrt extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -255,6 +255,18 @@ class Sqrt extends UnaryOperator // @TODO implements UnaryComplex
 				sqrt( abs( $s() ) )
 			);
 		return sqrt( $s() );
+	}
+
+	public function complex(Complex $c)
+	{
+		$aa = $c->real(); $aa *= $aa;
+		$bb = $c->imag(); $bb *= $bb;
+		$sq = sqrt( $aa + $bb );
+		$sign = $c->imag() <=> 0;
+		return [
+			sqrt( (   $c->real() + $sq ) / 2 ),
+			sqrt( ( - $c->real() + $sq ) / 2 ) * $sign
+		];
 	}
 }
 
