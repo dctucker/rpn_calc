@@ -46,6 +46,7 @@ class OperatorFactory extends SymbolFactory
 		'-'=>'minus',
 		'*'=>'times',
 		'/'=>'divide',
+		'-x'=>'negative',
 		'1/x'=>'reciprocal',
 		'^'=>'power',
 		'sqrt'=>'sqrt',
@@ -57,6 +58,10 @@ class OperatorFactory extends SymbolFactory
 		'mag'=>'mag',
 		'arg'=>'arg',
 		'conj'=>'conj',
+		'pop'=>'pop',
+		'swap'=>'swap',
+		'<<'=>'rotateL',
+		'>>'=>'rotateR',
 	];
 }
 

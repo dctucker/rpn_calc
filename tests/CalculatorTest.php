@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use App\Calculator;
+use App\Parser;
 use App\NonCommutativeStack as Stack;
 
 class CalculatorTest extends TestCase
@@ -16,9 +17,9 @@ class CalculatorTest extends TestCase
 	public function testCalculation()
 	{
 		$calc = new Calculator( new Stack );
-		$calc->push("123");
-		$calc->push("456");
-		$calc->push('*');
+		$calc->push( new App\Operands\Scalar("123") );
+		$calc->push( new App\Operands\Scalar("456") );
+		$calc->push( new App\Operators\Times("*") );
 		$this->assertEquals( 123 * 456, $calc->display() );
 		$this->assertEquals( 56088, $calc->display() );
 	}

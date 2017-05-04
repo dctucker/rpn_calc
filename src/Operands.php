@@ -19,15 +19,17 @@ class Scalar extends Operand
 
 	public function operate(Operator $op, $other = null)
 	{
-		if( $op->num_operands == 1 )
-			return $op->scalar( $this );
-
 		if( $other instanceof Complex )
 			return $other->operate( $op, $this );
 
-		assert( $other instanceof Scalar );
-		$this->symbol = $op->scalar( $this, $other );
-		return $this;
+		if( $op->num_operands == 1 )
+			$ret = $op->scalar( $this );
+		else
+		{
+			assert( $other instanceof Scalar );
+			$ret = $op->scalar( $this, $other );
+		}
+		return new Scalar( $ret );
 	}
 }
 class Pi extends Scalar

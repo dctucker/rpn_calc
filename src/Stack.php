@@ -8,6 +8,16 @@ class Stack
 
 	public function push($input)
 	{
+		//print_r( $input ); //debug
+		if( ! $input )
+			return false;
+		if( is_array($input) || $input instanceof \Generator )
+		{
+			$success = 0;
+			foreach( $input as $inp )
+				$success += array_push( $this->stack, $inp );
+			return $success;
+		}
 		return array_push( $this->stack, $input );
 	}
 
@@ -15,6 +25,11 @@ class Stack
 	{
 		for( $i = 0; $i < $n; $i++ )
 			yield array_pop( $this->stack );
+	}
+
+	public function size()
+	{
+		return count( $this->stack );
 	}
 
 	public function all()

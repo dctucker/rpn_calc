@@ -14,12 +14,11 @@ abstract class UnaryOperator extends Operator
 	public $num_operands = 1;
 	public abstract function scalar(Scalar $s);
 
-	public function __invoke(...$operand)
+	public function __invoke(...$operands)
 	{
-		if( ! $operand instanceof \Generator )
-			$operand = $this->generate( $operand );
+		$operands = $this->generate( $operands );
 		
-		$ret = $operand->current();
+		$ret = $operands->current();
 		$ret = $ret->operate( $this );
 
 		return $ret;
@@ -43,6 +42,26 @@ abstract class BinaryOperator extends Operator
 	}
 }
 
+// stack functions
+
+class Pop extends Operator
+{
+	public $num_operands = 1;
+	public function __invoke(...$operand)
+	{
+	}
+}
+
+class Swap extends Operator
+{
+	public $num_operands = 2;
+	public function __invoke(...$operands)
+	{
+		$operands = $this->generate( $operands );
+		yield from array_reverse( iterator_to_array( $operands ) );
+	}
+}
+
 trait AddComplex
 {
 	public function complex(Complex $c1, Complex $c2)
@@ -61,6 +80,8 @@ trait AddComplex
 		];
 	}
 }
+
+// arithmetic operations
 
 class Plus extends BinaryOperator
 {
@@ -135,30 +156,6 @@ class Divide extends BinaryOperator
 		];
 	}
 }
-class Power extends BinaryOperator
-{
-	public function scalar(Scalar $s1, Scalar $s2)
-	{
-		return pow($s1(), $s2()); // y^x, not x^y
-	}
-	public function scale(Complex $c, Scalar $s)
-	{
-		$mag = pow( $c->mag(), $s() );
-		$arg = $c->arg();
-		return [
-			$mag * cos( $s() * $arg ),
-			$mag * sin( $s() * $arg ),
-		];
-	}
-}
-class Sqrt extends UnaryOperator
-{
-	public function scalar(Scalar $s)
-	{
-		return sqrt( $s() );
-	}
-}
-
 class Reciprocal extends UnaryOperator
 {
 	public function scalar(Scalar $s)
@@ -179,6 +176,52 @@ class Reciprocal extends UnaryOperator
 		];
 	}
 }
+class Negative extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return - $s();
+	}
+	public function complex(Complex $c)
+	{
+		return [
+			- $c->real(),
+			- $c->imag()
+		];
+	}
+}
+
+
+// exponentation operations
+
+class Power extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return pow($s1(), $s2()); // y^x, not x^y
+	}
+	public function scale(Complex $c, Scalar $s)
+	{
+		$mag = pow( $c->mag(), $s() );
+		$arg = $c->arg();
+		return [
+			$mag * cos( $s() * $arg ),
+			$mag * sin( $s() * $arg ),
+		];
+	}
+}
+class Sqrt extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		if( $s() < 0 )
+			return new Complex(
+				0,
+				sqrt( abs( $s() ) )
+			);
+		return sqrt( $s() );
+	}
+}
 
 class Ln extends UnaryOperator
 {
@@ -195,6 +238,8 @@ class NthLog extends BinaryOperator
 		return log( $s1(), $s2() );
 	}
 }
+
+// trigonometric operations
 
 abstract class TrigOperator extends UnaryOperator
 {
@@ -238,15 +283,31 @@ class Tan extends TrigOperator
 		$this->sin = OperatorFactory::make('sin');
 		$this->div = OperatorFactory::make('/');
 	}
-	public function scalar(Scalar $o)
+	public function scalar(Scalar $s)
 	{
-		return tan( $o() );
+		return tan( $s() );
 	}
-	public function complex(Complex $o)
+	public function complex(Complex $c)
 	{
-		return ($this->div)( $this->sin($o) , $this->cos($o) );
+		return $this->div( $this->sin($c) , $this->cos($c) );
 	}
 }
+
+/*
+class Asin extends TrigOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return asin($s());
+	}
+	public function complex(Complex $c)
+	{
+		
+	}
+}
+ */
+
+// complex-oriented operations
 
 class Mag extends UnaryOperator
 {
