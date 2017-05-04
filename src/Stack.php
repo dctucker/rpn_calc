@@ -32,3 +32,11 @@ class Stack
 		return implode(' ', $this->stack);
 	}
 }
+
+class NonCommutativeStack extends Stack
+{
+	public function pop($n = 1)
+	{
+		yield from array_reverse( iterator_to_array( parent::pop($n) ) );
+	}
+}

@@ -5,7 +5,7 @@ require_once('autoload.php');
 
 use App\Parser;
 use App\Calculator;
-use App\Stack;
+use App\NonCommutativeStack as Stack;
 
 function usage()
 {
@@ -17,16 +17,20 @@ $parser = new Parser( $calc );
 
 $cmd = array_shift( $argv );
 $arg = array_shift( $argv );
-if( $arg == '-v' )
+if( strpos($arg, 'p') !== false )
 {
-	$parser->verbose = true;
-	$arg = array_shift( $argv );
+	$calc->setComplexFormat('polar');
 }
-elseif( $arg == '-h' )
+if( strpos($arg, 'h') !== false )
 {
 	echo "Operators: ".App\OperatorFactory::reference()."\n";
 	echo "Operands:  ".App\OperandFactory::reference()."\n";
 	return;
+}
+if( strpos($arg, 'v') !== false )
+{
+	$parser->verbose = true;
+	$arg = array_shift( $argv );
 }
 
 if( empty( $arg ) )

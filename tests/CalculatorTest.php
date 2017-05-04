@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use App\Calculator;
-use App\Stack;
+use App\NonCommutativeStack as Stack;
 
 class CalculatorTest extends TestCase
 {

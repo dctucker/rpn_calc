@@ -7,9 +7,9 @@ abstract class SymbolFactory
 	protected static $valids;
 	protected static $namespace;
 
-	public static function __callStatic($name, $string)
+	public static function __callStatic($name, $args)
 	{
-		return $name::make( reset($string) );
+		return static::make($name);
 	}
 
 	public static function make($string)

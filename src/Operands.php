@@ -65,26 +65,38 @@ class NegInf extends Scalar
 		return -INF;
 	}
 }
+
 class Complex extends Operand
 {
+	public static $default_format = "rectangular";
+	public $format;
 	public $real;
 	public $imag;
 
 	public function __construct($string)
 	{
+		$this->format = static::$default_format;
 		$this->real = new Scalar(0);
 		$this->imag = new Scalar(1);
 	}
 
 	public function getValue()
 	{
-		return [ $this->real->getValue(), $this->imag->getValue() ];
+		return [ $this->real(), $this->imag() ];
 	}
 
 	public function __toString()
 	{
-		//return $this->real .','. $this->imag . 'i';
+		if( $this->format == 'rectangular' )
+			return $this->rectangular();
+		elseif( $this->format == 'polar' )
+			return $this->polar();
 
+		return $this->real .','. $this->imag . 'i';
+	}
+
+	public function rectangular()
+	{
 		if( $this->real == '0' )
 		{
 			if( $this->imag == '1' )
@@ -99,18 +111,23 @@ class Complex extends Operand
 		if( $this->imag == '1' )
 			$str .= "+i";
 		elseif( $this->imag != '0' )
-			$str .= $this->imag->sign().abs( $this->imag->getValue() )."i";
+			$str .= $this->imag->sign().abs( $this->imag() )."i";
 		return $str;
+	}
+
+	public function polar()
+	{
+		return $this->mag()."exp".rad2deg($this->arg())."deg";
 	}
 
 	public function mag()
 	{
-		return sqrt( pow( $this->real->getValue(), 2 ) + pow( $this->imag->getValue(), 2 ) );
+		return sqrt( pow( $this->real(), 2 ) + pow( $this->imag(), 2 ) );
 	}
 
 	public function arg()
 	{
-		return atan2( $this->imag->getValue(), $this->real->getValue() );
+		return atan2( $this->imag(), $this->real() );
 	}
 
 	public function operate( Operator $op, $other = null )
@@ -132,10 +149,13 @@ class Complex extends Operand
 			throw new \Exception("unrecognized operand");
 		}
 
+		if( $complex instanceof Operand )
+			return $complex;
+
 		$this->real->symbol = $complex[0];
 		$this->imag->symbol = $complex[1];
 
-		if( $this->imag->getValue() == 0 )
+		if( $this->imag() == 0 )
 			return $this->real;
 
 		return $this;

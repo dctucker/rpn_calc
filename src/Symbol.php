@@ -4,6 +4,7 @@ namespace App;
 
 abstract class Symbol
 {
+	public $symbol;
 	public function __construct($symbol)
 	{
 		$this->symbol = $symbol;
@@ -27,7 +28,11 @@ abstract class Operator extends Symbol
 
 	public function generate($a)
 	{
+		if( is_array( $a ) && count( $a ) == 1 )
+			$a = reset($a);
 		if( is_array( $a ) )
+			yield from $a;
+		elseif( $a instanceof \Generator )
 			yield from $a;
 		else
 			yield $a;

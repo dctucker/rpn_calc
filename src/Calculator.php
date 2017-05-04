@@ -41,4 +41,9 @@ class Calculator
 	{
 		return "".$this->stack->peek();
 	}
+
+	public function setComplexFormat($f)
+	{
+		Operands\Complex::$default_format = $f;
+	}
 }
