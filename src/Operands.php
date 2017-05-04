@@ -29,6 +29,9 @@ class Scalar extends Operand
 			assert( $other instanceof Scalar );
 			$ret = $op->scalar( $this, $other );
 		}
+		if( $ret instanceof Operand )
+			return $ret;
+
 		return new Scalar( $ret );
 	}
 }

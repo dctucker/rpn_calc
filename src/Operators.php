@@ -19,6 +19,16 @@ abstract class UnaryOperator extends Operator
 	public abstract function scalar(Scalar $s);
 
 	/**
+	 * apply Operator to two Complex numbers
+	 * @return array data for constructing a new Complex
+	 */
+	public function complex(Complex $c1)
+	{
+		// NOT YET IMPLEMENTED FOR ALL OPERATORS
+		throw new \Exception("Not yet implemented");
+	}
+
+	/**
 	 * take a single operand and apply operator to it
 	 * @param $operands iterable of operand(s) - only first is used
 	 * @return Operand
@@ -277,6 +287,13 @@ class Ln extends UnaryOperator
 	public function scalar(Scalar $s)
 	{
 		return log( $s() );
+	}
+	public function complex(Complex $c)
+	{
+		return [
+			log( $c->mag() ),
+			$c->arg()
+		];
 	}
 }
 

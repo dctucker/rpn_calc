@@ -7,6 +7,7 @@ abstract class Symbol
 	public $symbol;
 	public function __construct($symbol)
 	{
+		assert( ! $symbol instanceof Symbol );
 		$this->symbol = $symbol;
 	}
 
