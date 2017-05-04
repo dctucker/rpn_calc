@@ -13,6 +13,10 @@ class Calculator
 		$this->stack = $stack;
 	}
 
+	/**
+	 * enter a symbol into the calculator
+	 * push onto stack or apply the given operator
+	 */
 	public function push(Symbol $sym)
 	{
 		$this->warning = false;
@@ -22,6 +26,9 @@ class Calculator
 			return $this->stack->push( $sym );
 	}
 
+	/**
+	 * pop the stack and apply the operator, issue warnings if needed
+	 */
 	public function applyOperator(Operator $operator)
 	{
 		$stacksize = $this->stack->size();
@@ -36,11 +43,18 @@ class Calculator
 		return $this->stack->push( $result );
 	}
 
+	/**
+	 * @return string the item on the top of the stack
+	 */
 	public function display()
 	{
 		return "".$this->stack->peek();
 	}
 
+	/**
+	 * set format to be used by complex numbers
+	 * @param $f string can be polar or rectangular
+	 */
 	public function setComplexFormat($f)
 	{
 		Operands\Complex::$default_format = $f;

@@ -12,8 +12,17 @@ use App\Operands\Complex;
 abstract class UnaryOperator extends Operator
 {
 	public $num_operands = 1;
+	/**
+	 * apply Operator to the given Scalar
+	 * @return mixed data for constructing a new Scalar
+	 */
 	public abstract function scalar(Scalar $s);
 
+	/**
+	 * take a single operand and apply operator to it
+	 * @param $operands iterable of operand(s) - only first is used
+	 * @return Operand
+	 */
 	public function __invoke(...$operands)
 	{
 		$operands = $this->generate( $operands );
@@ -28,15 +37,36 @@ abstract class UnaryOperator extends Operator
 abstract class BinaryOperator extends Operator
 {
 	public $num_operands = 2;
+	/**
+	 * apply Operator to two Scalars
+	 * @return mixed data for constructing a new Scalar
+	 */
 	public abstract function scalar(Scalar $s1, Scalar $s2);
 
+	/**
+	 * apply Operator to two Complex numbers
+	 * @return array data for constructing a new Complex
+	 */
+	public function complex(Complex $c1, Complex $c2)
+	{
+		// NOT YET IMPLEMENTED FOR ALL OPERATORS
+		throw new \Exception("Not yet implemented");
+	}
+
+	/**
+	 * take operands and apply operator to them in sequence
+	 * @param $operands iterable of operands
+	 * @return Operand
+	 */
 	public function __invoke(...$operands)
 	{
 		$operands = $this->generate( $operands );
 
 		$ret = $operands->current();
 		for( $operands->next(); $operands->valid(); $operands->next() )
+		{
 			$ret = $ret->operate( $this, $operands->current() );
+		}
 
 		return $ret;
 	}
@@ -47,20 +77,33 @@ abstract class BinaryOperator extends Operator
 class Pop extends Operator
 {
 	public $num_operands = 1;
+	/**
+	 * incoming operand(s) will the thrown away.
+	 * @param $operand Generator of items to discard
+	 * @return void
+	 */
 	public function __invoke(...$operand)
 	{
+		// NOP
 	}
 }
 
 class Swap extends Operator
 {
 	public $num_operands = 2;
+	/**
+	 * @param @operands Generator of items
+	 * @return Generator of items in reverse order
+	 */
 	public function __invoke(...$operands)
 	{
 		$operands = $this->generate( $operands );
 		yield from array_reverse( iterator_to_array( $operands ) );
 	}
 }
+
+
+// arithmetic operations
 
 trait AddComplex
 {
@@ -72,6 +115,10 @@ trait AddComplex
 		];
 	}
 
+	/**
+	 * add the given Scalar to the real part of the given Complex number
+	 * @return array data for constructing a new Complex
+	 */
 	public function scale(Complex $c, Scalar $s)
 	{
 		return [
@@ -80,8 +127,6 @@ trait AddComplex
 		];
 	}
 }
-
-// arithmetic operations
 
 class Plus extends BinaryOperator
 {
@@ -102,6 +147,10 @@ class Minus extends BinaryOperator
 
 trait ScaleComplex
 {
+	/**
+	 * multiply both components of the given Complex by the given Scalar
+	 * @return data for constructing a new Complex
+	 */
 	public function scale(Complex $c, Scalar $s)
 	{
 		return [
