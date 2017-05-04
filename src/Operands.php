@@ -7,11 +7,17 @@ use App\Operator;
 
 class Scalar extends Operand
 {
+	/**
+	 * @return the primitive scalar data
+	 */
 	public function getValue()
 	{
 		return $this->symbol;
 	}
 
+	/**
+	 * @return string + or -
+	 */
 	public function sign()
 	{
 		return $this->getValue() > 0 ? '+' : '-';
@@ -35,41 +41,12 @@ class Scalar extends Operand
 		return new Scalar( $ret );
 	}
 }
-class Pi extends Scalar
-{
-	public function getValue()
-	{
-		return M_PI;
-	}
-}
-class Exp extends Scalar
-{
-	public function getValue()
-	{
-		return M_E;
-	}
-}
-class Nan extends Scalar
-{
-	public function getValue()
-	{
-		return NAN;
-	}
-}
-class PosInf extends Scalar
-{
-	public function getValue()
-	{
-		return INF;
-	}
-}
-class NegInf extends Scalar
-{
-	public function getValue()
-	{
-		return -INF;
-	}
-}
+
+class Pi     extends Scalar { public function getValue() { return M_PI; } }
+class Exp    extends Scalar { public function getValue() { return M_E; } }
+class Nan    extends Scalar { public function getValue() { return NAN; } }
+class PosInf extends Scalar { public function getValue() { return INF; } }
+class NegInf extends Scalar { public function getValue() { return -INF; } }
 
 class Complex extends Operand
 {
@@ -78,6 +55,11 @@ class Complex extends Operand
 	public $real;
 	public $imag;
 
+	/**
+	 * initialize this Complex real and imag components, and default format
+	 * @param $real Scalar or double - defaults to zero
+	 * @param $imag Scalar or double - defaults to one
+	 */
 	public function __construct($real, $imag=1)
 	{
 		if( $real instanceof Scalar && $imag instanceof Scalar )
@@ -93,6 +75,9 @@ class Complex extends Operand
 		$this->format = static::$default_format;
 	}
 
+	/**
+	 * @return array of the primitive real and imaginary values
+	 */
 	public function getValue()
 	{
 		return [ $this->real(), $this->imag() ];
@@ -108,6 +93,9 @@ class Complex extends Operand
 		return $this->real .','. $this->imag . 'i';
 	}
 
+	/**
+	 * @return string e.g. 4+5i
+	 */
 	public function rectangular()
 	{
 		if( $this->real == '0' )
@@ -128,16 +116,26 @@ class Complex extends Operand
 		return $str;
 	}
 
+	/**
+	 * polar representation in degrees of this complex vector
+	 * @return string e.g. 3.6055exp45deg
+	 */
 	public function polar()
 	{
 		return $this->mag()."exp".rad2deg($this->arg())."deg";
 	}
 
+	/**
+	 * @return double magnitude of this complex vector
+	 */
 	public function mag()
 	{
 		return sqrt( pow( $this->real(), 2 ) + pow( $this->imag(), 2 ) );
 	}
 
+	/**
+	 * @return double argument (phase) of this complex vector
+	 */
 	public function arg()
 	{
 		return atan2( $this->imag(), $this->real() );
@@ -145,22 +143,31 @@ class Complex extends Operand
 
 	public function operate( Operator $op, $other = null )
 	{
+		$complex = false;
 		if( $op->num_operands == 1 )
 		{
-			$complex = $op->complex( $this );
+			if( $op->implements('UnaryComplex') )
+			{
+				$complex = $op->complex( $this );
+			}
 		}
 		elseif( $other instanceof Complex )
 		{
-			$complex = $op->complex( $this, $other );
+			if( $op->implements('BinaryComplex') )
+			{
+				$complex = $op->complex( $this, $other );
+			}
 		}
 		elseif( $other instanceof Scalar )
 		{
-			$complex = $op->scale( $this, $other );
+			if( $op->implements('BinaryComplexScalar') )
+			{
+				$complex = $op->scale( $this, $other );
+			}
 		}
-		else
-		{
-			throw new \Exception("unrecognized operand");
-		}
+
+		if( ! $complex )
+			return false;
 
 		if( $complex instanceof Operand )
 			return $complex;

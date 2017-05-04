@@ -2,7 +2,17 @@
 
 namespace App;
 
-class Stack
+interface Stack
+{
+	public function push($input);
+	public function pop($n);
+	public function size();
+	public function all();
+	public function peek();
+	public function __toString();
+}
+
+class GeneratorStack implements Stack
 {
 	protected $stack = [];
 
@@ -34,6 +44,14 @@ class Stack
 	{
 		for( $i = 0; $i < $n; $i++ )
 			yield array_pop( $this->stack );
+	}
+
+	/**
+	 * remove all items from the stack
+	 */
+	public function clear()
+	{
+		$this->stack = [];
 	}
 
 	/**
@@ -69,7 +87,7 @@ class Stack
 	}
 }
 
-class NonCommutativeStack extends Stack
+class NonCommutativeStack extends GeneratorStack
 {
 	/**
 	 * useful for applying non-commutative operations

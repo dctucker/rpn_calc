@@ -9,24 +9,18 @@ use App\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
 
-abstract class UnaryOperator extends Operator
+interface StackOperator   {}
+interface ComplexOperator {}
+interface ScalarOperator  {}
+interface UnaryScalar   extends ScalarOperator  { public function scalar(Scalar $s); }
+interface BinaryScalar  extends ScalarOperator  { public function scalar(Scalar $s1, Scalar $s2); }
+interface UnaryComplex  extends ComplexOperator { public function complex(Complex $c); }
+interface BinaryComplex extends ComplexOperator { public function complex(Complex $c1, Complex $c2); }
+interface BinaryComplexScalar  extends ComplexOperator { public function scale(Complex $c, Scalar $s); }
+
+abstract class UnaryOperator extends Operator implements UnaryScalar
 {
 	public $num_operands = 1;
-	/**
-	 * apply Operator to the given Scalar
-	 * @return mixed data for constructing a new Scalar
-	 */
-	public abstract function scalar(Scalar $s);
-
-	/**
-	 * apply Operator to two Complex numbers
-	 * @return array data for constructing a new Complex
-	 */
-	public function complex(Complex $c1)
-	{
-		// NOT YET IMPLEMENTED FOR ALL OPERATORS
-		throw new \Exception("Not yet implemented");
-	}
 
 	/**
 	 * take a single operand and apply operator to it
@@ -44,24 +38,9 @@ abstract class UnaryOperator extends Operator
 	}
 }
 
-abstract class BinaryOperator extends Operator
+abstract class BinaryOperator extends Operator implements BinaryScalar
 {
 	public $num_operands = 2;
-	/**
-	 * apply Operator to two Scalars
-	 * @return mixed data for constructing a new Scalar
-	 */
-	public abstract function scalar(Scalar $s1, Scalar $s2);
-
-	/**
-	 * apply Operator to two Complex numbers
-	 * @return array data for constructing a new Complex
-	 */
-	public function complex(Complex $c1, Complex $c2)
-	{
-		// NOT YET IMPLEMENTED FOR ALL OPERATORS
-		throw new \Exception("Not yet implemented");
-	}
 
 	/**
 	 * take operands and apply operator to them in sequence
@@ -84,7 +63,7 @@ abstract class BinaryOperator extends Operator
 
 // stack functions
 
-class Pop extends Operator
+class Pop extends Operator implements StackOperator
 {
 	public $num_operands = 1;
 	/**
@@ -98,7 +77,7 @@ class Pop extends Operator
 	}
 }
 
-class Swap extends Operator
+class Swap extends Operator implements StackOperator
 {
 	public $num_operands = 2;
 	/**
@@ -138,7 +117,7 @@ trait AddComplex
 	}
 }
 
-class Plus extends BinaryOperator
+class Plus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
 	use AddComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
@@ -146,7 +125,7 @@ class Plus extends BinaryOperator
 		return $s1() + $s2();
 	}
 }
-class Minus extends BinaryOperator
+class Minus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
 	use AddComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
@@ -170,7 +149,7 @@ trait ScaleComplex
 	}
 }
 
-class Times extends BinaryOperator
+class Times extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
 	use ScaleComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
@@ -189,7 +168,7 @@ class Times extends BinaryOperator
 		];
 	}
 }
-class Divide extends BinaryOperator
+class Divide extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
 	use ScaleComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
@@ -215,7 +194,7 @@ class Divide extends BinaryOperator
 		];
 	}
 }
-class Reciprocal extends UnaryOperator
+class Reciprocal extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -235,7 +214,7 @@ class Reciprocal extends UnaryOperator
 		];
 	}
 }
-class Negative extends UnaryOperator
+class Negative extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -253,7 +232,7 @@ class Negative extends UnaryOperator
 
 // exponentation operations
 
-class Power extends BinaryOperator
+class Power extends BinaryOperator implements BinaryComplexScalar
 {
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
@@ -269,7 +248,7 @@ class Power extends BinaryOperator
 		];
 	}
 }
-class Sqrt extends UnaryOperator
+class Sqrt extends UnaryOperator // @TODO implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -282,7 +261,7 @@ class Sqrt extends UnaryOperator
 	}
 }
 
-class Ln extends UnaryOperator
+class Ln extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -311,7 +290,7 @@ abstract class TrigOperator extends UnaryOperator
 {
 }
 
-class Sin extends TrigOperator
+class Sin extends TrigOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -326,7 +305,7 @@ class Sin extends TrigOperator
 		];
 	}
 }
-class Cos extends TrigOperator
+class Cos extends TrigOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -340,7 +319,7 @@ class Cos extends TrigOperator
 		];
 	}
 }
-class Tan extends TrigOperator
+class Tan extends TrigOperator implements UnaryComplex
 {
 	public function __construct($symbol)
 	{
@@ -359,23 +338,9 @@ class Tan extends TrigOperator
 	}
 }
 
-/*
-class Asin extends TrigOperator
-{
-	public function scalar(Scalar $s)
-	{
-		return asin($s());
-	}
-	public function complex(Complex $c)
-	{
-		
-	}
-}
- */
-
 // complex-oriented operations
 
-class Mag extends UnaryOperator
+class Mag extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -390,7 +355,7 @@ class Mag extends UnaryOperator
 	}
 }
 
-class Arg extends UnaryOperator
+class Arg extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{
@@ -405,7 +370,7 @@ class Arg extends UnaryOperator
 	}
 }
 
-class Conj extends UnaryOperator
+class Conj extends UnaryOperator implements UnaryComplex
 {
 	public function scalar(Scalar $s)
 	{

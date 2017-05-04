@@ -10,6 +10,10 @@ class Parser
 		$this->calculator = $calc;
 	}
 
+	/**
+	 * loop through given tokens and apply them to the Calculator
+	 * @param $tokens array of string
+	 */
 	public function parse($tokens)
 	{
 		if( is_string( $tokens ) )
@@ -38,6 +42,11 @@ class Parser
 		}
 	}
 
+	/**
+	 * validate the given token and run it through the appropriate factory
+	 * @param $string string
+	 * @return Symbol or void
+	 */
 	public function resolveSymbol($string)
 	{
 		if( OperandFactory::isValid($string) )
@@ -45,5 +54,4 @@ class Parser
 		elseif( OperatorFactory::isValid($string) )
 			return OperatorFactory::make($string);
 	}
-
 }
