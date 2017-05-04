@@ -95,6 +95,9 @@ class NonCommutativeStack extends GeneratorStack
 	 */
 	public function pop($n = 1)
 	{
-		yield from array_reverse( iterator_to_array( parent::pop($n) ) );
+		$offset = $this->size() - $n;
+		for( $i=0 ; $i < $n; $i++ )
+			yield from array_splice( $this->stack, $offset, 1 );
+		//yield from array_reverse( iterator_to_array( parent::pop($n) ) );
 	}
 }
