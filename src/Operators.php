@@ -114,6 +114,8 @@ class Divide extends BinaryOperator
 	use ScaleComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
+		if( $s2() == 0 )
+			return NAN;
 		return $s1() / $s2();
 	}
 
@@ -125,9 +127,11 @@ class Divide extends BinaryOperator
 		$bd = $c1->imag() * $c2->imag();
 		$cc = $c2->real(); $cc *= $cc;
 		$dd = $c2->imag(); $dd *= $dd;
+		if( $cc + $dd == 0 )
+			return [NAN,NAN];
 		return [
-			( $ac + $bd ) / ( $cc + $dd ),
-			( $bc - $ad ) / ( $cc + $dd ),
+			($ac + $bd) / ($cc + $dd),
+			($bc - $ad) / ($cc + $dd)
 		];
 	}
 }
@@ -159,12 +163,16 @@ class Reciprocal extends UnaryOperator
 {
 	public function scalar(Scalar $s)
 	{
+		if( $s() == 0 )
+			return NAN;
 		return 1 / $s();
 	}
 	public function complex(Complex $c)
 	{
 		$xx = $c->real(); $xx *= $xx;
 		$yy = $c->imag(); $yy *= $yy;
+		if( $xx + $yy == 0 )
+			return [NAN,NAN];
 		return [
 			  $c->real() / ( $xx + $yy ),
 			- $c->imag() / ( $xx + $yy )
@@ -236,8 +244,7 @@ class Tan extends TrigOperator
 	}
 	public function complex(Complex $o)
 	{
-		$operands = [ ($this->cos)($o), ($this->sin)($o) ];
-		return ($this->div)( $operands );
+		return ($this->div)( $this->sin($o) , $this->cos($o) );
 	}
 }
 

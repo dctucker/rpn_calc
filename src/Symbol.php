@@ -26,10 +26,18 @@ abstract class Operator extends Symbol
 		return $this->symbol;
 	}
 
+	public function __call($func, $args)
+	{
+		if( property_exists( $this, $func ) )
+			return ($this->$func)(...$args);
+		else
+			throw new \Exception("Attribute not found: $string");
+	}
+
 	public function generate($a)
 	{
-		if( is_array( $a ) && count( $a ) == 1 )
-			$a = reset($a);
+		//if( is_array( $a ) && count( $a ) == 1 )
+		//	$a = reset($a);
 		if( is_array( $a ) )
 			yield from $a;
 		elseif( $a instanceof \Generator )

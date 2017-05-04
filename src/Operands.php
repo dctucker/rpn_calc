@@ -73,11 +73,19 @@ class Complex extends Operand
 	public $real;
 	public $imag;
 
-	public function __construct($string)
+	public function __construct($real, $imag=1)
 	{
+		if( $real instanceof Scalar && $imag instanceof Scalar )
+		{
+			$this->real = $real;
+			$this->imag = $imag;
+		}
+		else
+		{
+			$this->real = new Scalar(0);
+			$this->imag = new Scalar($imag);
+		}
 		$this->format = static::$default_format;
-		$this->real = new Scalar(0);
-		$this->imag = new Scalar(1);
 	}
 
 	public function getValue()
@@ -152,12 +160,6 @@ class Complex extends Operand
 		if( $complex instanceof Operand )
 			return $complex;
 
-		$this->real->symbol = $complex[0];
-		$this->imag->symbol = $complex[1];
-
-		if( $this->imag() == 0 )
-			return $this->real;
-
-		return $this;
+		return new Complex( new Scalar($complex[0]), new Scalar($complex[1]) );
 	}
 }

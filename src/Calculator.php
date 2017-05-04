@@ -25,7 +25,7 @@ class Calculator
 	public function applyOperator(Operator $operator)
 	{
 		$operands = $this->stack->pop( $operator->num_operands );
-		$result = $operator( $operands );
+		$result = $operator( ...$operands );
 		$this->stack->push( $result );
 	}
 
