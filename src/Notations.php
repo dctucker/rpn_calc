@@ -7,26 +7,50 @@ interface Notation
 	public static function regex();
 }
 
-trait Complex
+trait Regex
 {
+	/**
+	 * @param $string string to pattern-match, or null to return pattern
+	 * @return string regex pattern or boolean indicating string matched
+	 */
 	public static function regex($string=null)
 	{
-		$pattern = '/^((-?[0-9.]+)([+-]))?([0-9.]+)?i$/';
-		return $string === null ? $pattern : preg_match($pattern, $string);
+		$pattern = static::pattern();
+		if( $string === null ) return $pattern;
+		$matches = [];
+		if( preg_match($pattern, $string, $matches) )
+			return $matches;
+	}
+	/**
+	 * @return string of regular expression to use
+	 */
+	public static function pattern()
+	{
+		return "/^.*$/";
+	}
+}
+
+trait Complex
+{
+	use Regex;
+	public static function pattern()
+	{
+		return '/^((-?[0-9.]+)([+-]))?([0-9.]+)?i$/';
 	}
 }
 
 trait Alphabetic
 {
-	public static function regex($string=null)
+	use Regex;
+	public static function pattern()
 	{
-		$pattern = "/^[+-]?[^0-9].*$/";
-		return $string === null ? $pattern : preg_match($pattern, $string);
+		return "/^[+-]?[^0-9].*$/";
 	}
 }
 
 trait Base
 {
+	use Regex;
 	/**
 	 * @param $integer numeric
 	 * @return string token representing the given integer in this base
@@ -36,11 +60,7 @@ trait Base
 		return static::$prefix.base_convert( $integer, 10, static::$base );
 	}
 
-	/**
-	 * @param $string string to pattern-match, or null to return pattern
-	 * @return string regex pattern or boolean indicating string matched
-	 */
-	public static function regex($string=null)
+	public static function pattern()
 	{
 		$chars = "0-";
 		if( static::$base > 10 )
@@ -52,10 +72,7 @@ trait Base
 		{
 			$chars .= static::$base - 1;
 		}
-		$pattern = "/^".static::$prefix."[$chars]+$/";
-		if( is_string( $string ) )
-			return preg_match($pattern, $string);
-		return $pattern;
+		return "/^".static::$prefix."[$chars]+$/";
 	}
 }
 
@@ -64,10 +81,9 @@ trait Decimal
 	use Base;
 	static $prefix = "";
 	static $base = 10;
-	public static function regex($string=null)
+	public static function pattern()
 	{
-		$pattern = '/^(-?[0-9.]+)$/';
-		return $string === null ? $pattern : preg_match($pattern, $string);
+		return '/^(-?[0-9.]+)$/';
 	}
 }
 

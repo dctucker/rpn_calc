@@ -124,8 +124,7 @@ class Complex extends Operand
 
 	public function setValue($string)
 	{
-		$matches = [];
-		preg_match(static::regex(), $string, $matches);
+		$matches = static::regex($string);
 		//print_r( $matches );
 		$real = $matches[2] ?? 0;
 		$imag = str_replace('+','', ( $matches[3] ?? '' ) . ($matches[4] ?? 1));
