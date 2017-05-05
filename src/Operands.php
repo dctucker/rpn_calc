@@ -12,7 +12,7 @@ class Scalar extends Operand
 	 */
 	public function getValue()
 	{
-		return $this->symbol;
+		return $this->symbol * 1;
 	}
 
 	/**
@@ -35,12 +35,33 @@ class Scalar extends Operand
 			assert( $other instanceof Scalar );
 			$ret = $op->scalar( $this, $other );
 		}
+
 		if( $ret instanceof Operand )
 			return $ret;
 
-		return new Scalar( $ret );
+		$scalar = new static( $ret );
+		$scalar->setValue($ret);
+		return $scalar;
 	}
 }
+
+abstract class BaseScalar extends Scalar
+{
+	public function getValue()
+	{
+		$raw_part = $this->symbol; //substr( $this->symbol, strlen(static::$prefix) );
+		return base_convert( $raw_part, static::$base, 10 ) * 1;
+	}
+
+	public function setValue($value)
+	{
+		$this->symbol = static::$prefix.base_convert( $value, 10, static::$base );
+	}
+}
+
+class OctalScalar  extends BaseScalar { use \App\Bases\Octal; }
+class HexScalar    extends BaseScalar { use \App\Bases\Hexidecimal; }
+class BinaryScalar extends BaseScalar { use \App\Bases\Binary; }
 
 class Pi     extends Scalar { public function getValue() { return M_PI; } }
 class Exp    extends Scalar { public function getValue() { return M_E; } }

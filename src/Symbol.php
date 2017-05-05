@@ -81,6 +81,15 @@ abstract class Operator extends Symbol
 abstract class Operand extends Symbol
 {
 	/**
+	 * @param $symbol string representation/value of this symbol
+	 */
+	public function __construct($symbol)
+	{
+		assert( ! $symbol instanceof Symbol );
+		$this->symbol = $symbol;
+	}
+
+	/**
 	 * apply operator e.g. this + other
 	 * @param $op Operator which operation to apply
 	 * @param $other Operand
@@ -114,4 +123,13 @@ abstract class Operand extends Symbol
 	 * @return double the primitive value represented by this Operand
 	 */
 	public abstract function getValue();
+
+	/**
+	 * initialize symbol to given input
+	 */
+	public function setValue($value)
+	{
+		$this->symbol = $value;
+	}
+
 }

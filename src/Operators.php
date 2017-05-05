@@ -226,6 +226,118 @@ class Negative extends UnaryOperator implements UnaryComplex
 	}
 }
 
+class Modulo extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() % $s2();
+	}
+}
+
+class Intval extends UnaryOperator
+{
+	public function scalar(Scalar $s1)
+	{
+		return intval($s1());
+	}
+}
+
+class Frac extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return $s() - floor($s());
+	}
+}
+
+class Round extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return round($s());
+	}
+}
+
+
+// base conversion operations
+
+abstract class BaseOperator extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		$string = static::$prefix.base_convert( $s(), 10, static::$base );
+		return OperandFactory::make( $string );
+	}
+}
+
+class Bin extends BaseOperator { use \App\Bases\Binary; }
+class Oct extends BaseOperator { use \App\Bases\Octal; }
+class Dec extends BaseOperator { use \App\Bases\Decimal; }
+class Hex extends BaseOperator { use \App\Bases\Hexidecimal; }
+
+class Dump extends UnaryOperator implements UnaryComplex
+{
+	public function scalar(Scalar $s)
+	{
+		var_dump($s);
+		return $s;
+	}
+	public function complex(Complex $c)
+	{
+		var_dump($c);
+		return $c;
+	}
+}
+
+// bitwise operations
+
+class BAnd extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() & $s2();
+	}
+}
+
+class BOr extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() | $s2();
+	}
+}
+
+class BXor extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() ^ $s2();
+	}
+}
+
+class BNot extends UnaryOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return ~ $s();
+	}
+}
+
+class BShiftLeft extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() << $s2();
+	}
+}
+
+class BShiftRight extends BinaryOperator
+{
+	public function scalar(Scalar $s1, Scalar $s2)
+	{
+		return $s1() >> $s2();
+	}
+}
 
 // exponentation operations
 
@@ -233,11 +345,11 @@ class Power extends BinaryOperator implements BinaryComplexScalar
 {
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
-		return pow($s1(), $s2()); // y^x, not x^y
+		return $s1() ** $s2(); // y^x, not x^y
 	}
 	public function scale(Complex $c, Scalar $s)
 	{
-		$mag = pow( $c->mag(), $s() );
+		$mag = $c->mag() ** $s();
 		$arg = $c->arg();
 		return [
 			$mag * cos( $s() * $arg ),
@@ -285,11 +397,18 @@ class Ln extends UnaryOperator implements UnaryComplex
 	}
 }
 
-class NthLog extends BinaryOperator
+class NthLog extends BinaryOperator implements BinaryComplexScalar
 {
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
 		return log( $s1(), $s2() );
+	}
+	public function scale(Complex $c, Scalar $s)
+	{
+		return [
+			log( $c->mag() ) / log( $s() ),
+			$c->arg() / log( $s() )
+		];
 	}
 }
 

@@ -73,6 +73,20 @@ class OperatorFactory extends SymbolFactory
 		'-x'=>'negative',
 		'1/x'=>'reciprocal',
 		'^'=>'power',
+		'int'=>'intval',
+		'frac'=>'frac',
+		'mod'=>'modulo',
+		'round'=>'round',
+		'bin'=>'bin',
+		'hex'=>'hex',
+		'dec'=>'dec',
+		'oct'=>'oct',
+		'and'=>'bAnd',
+		'or'=>'bOr',
+		'xor'=>'bXor',
+		'not'=>'bNot',
+		'shl'=>'bShiftLeft',
+		'shr'=>'bShiftRight',
 		'sqrt'=>'sqrt',
 		'ln'=>'ln',
 		'nthlog'=>'nthLog',
@@ -84,6 +98,7 @@ class OperatorFactory extends SymbolFactory
 		'conj'=>'conj',
 		'pop'=>'pop',
 		'swap'=>'swap',
+		'dump'=>'dump',
 		//'<<'=>'rotateL',
 		//'>>'=>'rotateR',
 	];
@@ -103,14 +118,34 @@ class OperandFactory extends SymbolFactory
 
 	public static function isValid($string)
 	{
-		return is_numeric($string) || parent::isValid($string);
+		return static::isDecimal($string) || static::isHex($string) || static::isBinary($string) || parent::isValid($string);
 	}
 
 	public static function lookupClassname($string)
 	{
-		if( is_numeric( $string ) )
+		if( static::isDecimal( $string ) )
 			return "Scalar";
+		if( static::isBinary($string) )
+			return "BinaryScalar";
+		if( static::isHex($string) )
+			return "HexScalar";
 		return parent::lookupClassname($string);
+	}
+
+	public static function isHex($string)
+	{
+		return strpos($string, \App\Bases\Hexidecimal::$prefix) !== false;
+		return preg_match('/^0x[0-9A-Fa-f]+$/', $string);
+	}
+
+	public static function isBinary($string)
+	{
+		return preg_match('/^b[01]+$/', $string);
+	}
+
+	public static function isDecimal($string)
+	{
+		return preg_match('/^[0-9.]+$/', $string);
 	}
 }
 
