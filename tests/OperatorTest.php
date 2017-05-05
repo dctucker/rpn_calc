@@ -58,4 +58,12 @@ class OperatorTest extends TestCase
 		$this->assertEquals(        0, OperatorFactory::make('sin')->scalar(O(0)));
 		$this->assertEquals(        0, OperatorFactory::make('tan')->scalar(O(0)));
 	}
+
+	public function testComplexMethods()
+	{
+		$this->assertEquals([0, 5], OperatorFactory::make('+')->complex(O("2i"),O("3i")));
+		$this->assertEquals([0,-1], OperatorFactory::make('-')->complex(O("2i"),O("3i")));
+		$this->assertEquals([-6,0], OperatorFactory::make('*')->complex(O("2i"),O("3i")));
+		$this->assertEquals([2/3,0], OperatorFactory::make('/')->complex(O("2i"),O("3i")));
+	}
 }

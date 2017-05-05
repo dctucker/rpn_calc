@@ -81,6 +81,26 @@ class Pop extends Operator implements StackOperator
 	}
 }
 
+class Push extends Operator implements StackOperator
+{
+	public $num_operands = 1;
+	/**
+	 * incoming operand will duplicated.
+	 * @param $operand mixed item to duplicate
+	 * @return Generator
+	 */
+	public function __invoke(...$operands)
+	{
+		$operands = $this->generate($operands);
+		$operand = $operands->current();
+		if( $operand )
+		{
+			yield $operand;
+			yield $operand;
+		}
+	}
+}
+
 class Swap extends Operator implements StackOperator
 {
 	public $num_operands = 2;
@@ -484,10 +504,7 @@ class Mag extends UnaryOperator implements UnaryComplex
 	}
 	public function complex(Complex $c)
 	{
-		return [
-			$c->mag(),
-			0
-		];
+		return OperandFactory::make($c->mag());
 	}
 }
 
@@ -499,10 +516,7 @@ class Arg extends UnaryOperator implements UnaryComplex
 	}
 	public function complex(Complex $c)
 	{
-		return [
-			$c->arg(),
-			0
-		];
+		return OperandFactory::make($c->arg());
 	}
 }
 
@@ -518,5 +532,29 @@ class Conj extends UnaryOperator implements UnaryComplex
 			  $c->real(),
 			- $c->imag()
 		];
+	}
+}
+
+class RealPart extends UnaryOperator implements UnaryComplex
+{
+	public function scalar(Scalar $s)
+	{
+		return $s();
+	}
+	public function complex(Complex $c)
+	{
+		return $c->real;
+	}
+}
+
+class ImagPart extends UnaryOperator implements UnaryComplex
+{
+	public function scalar(Scalar $s)
+	{
+		return 0;
+	}
+	public function complex(Complex $c)
+	{
+		return $c->imag;
 	}
 }

@@ -12,6 +12,23 @@ function usage()
 	die("Usage: rpn_calc.php [-v] \"<operand> <operand> <operator> ...\"\n");
 }
 
+
+function ansi_stack($stack)
+{
+	if( count( $stack ) == 0 )
+		return '';
+	$str = "\033[0m";
+	for($i = 0; $i < count($stack) - 2; $i++)
+	{
+		$str .= $stack[$i].' ';
+	}
+	if( count($stack) > 1 )
+		$str .= "\033[1m".$stack[ $i++ ].' ';
+	$str .= "\033[1;4m".$stack[ $i ];
+	$str .= "\033[0m";
+	return $str;
+}
+
 $calc = new Calculator( new Stack );
 $parser = new Parser( $calc );
 
@@ -49,7 +66,7 @@ if( $arg[0] == '-' )
 				break;
 			$parser->parse( $input );
 			readline_add_history( $input );
-			$prompt = trim($calc->stack." rpn")."> ";
+			$prompt = trim(ansi_stack($calc->stack->all())." rpn")."> ";
 			//echo $calc->display()."\n";
 		}
 		while( true );

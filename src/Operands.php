@@ -70,16 +70,16 @@ class OctalScalar   extends BaseScalar { use Octal; }
 class HexScalar     extends BaseScalar { use Hexadecimal; }
 class BinaryScalar  extends BaseScalar { use Binary; }
 
-abstract class Transcendental extends Scalar
+abstract class Constant extends Scalar
 {
 	use Alphabetic;
 }
 
-class Pi     extends Transcendental { public function getValue() { return M_PI; } }
-class Exp    extends Transcendental { public function getValue() { return M_E; } }
-class Nan    extends Transcendental { public function getValue() { return NAN; } }
-class PosInf extends Transcendental { public function getValue() { return INF; } }
-class NegInf extends Transcendental { public function getValue() { return -INF; } }
+class Pi     extends Constant { public function getValue() { return M_PI; } }
+class Exp    extends Constant { public function getValue() { return M_E; } }
+class Nan    extends Constant { public function getValue() { return NAN; } }
+class PosInf extends Constant { public function getValue() { return INF; } }
+class NegInf extends Constant { public function getValue() { return -INF; } }
 
 class Complex extends Operand
 {
@@ -125,7 +125,6 @@ class Complex extends Operand
 	public function setValue($string)
 	{
 		$matches = static::regex($string);
-		//print_r( $matches );
 		$real = $matches[2] ?? 0;
 		$imag = str_replace('+','', ( $matches[3] ?? '' ) . ($matches[4] ?? 1));
 		$this->real = new DecimalScalar( $real );

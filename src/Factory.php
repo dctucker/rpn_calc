@@ -92,10 +92,13 @@ class OperatorFactory extends SymbolFactory
 		'sin'=>'sin',
 		'cos'=>'cos',
 		'tan'=>'tan',
+		're'=>'realPart',
+		'im'=>'imagPart',
 		'mag'=>'mag',
 		'arg'=>'arg',
 		'conj'=>'conj',
 		'pop'=>'pop',
+		'push'=>'push',
 		'swap'=>'swap',
 		'dump'=>'dump',
 		//'<<'=>'rotateL',
@@ -119,7 +122,7 @@ class OperandFactory extends SymbolFactory
 	public static function isValid($string)
 	{
 		return static::isDecimal($string) || static::isOctal($string)
-			|| static::isHex($string) || static::isBinary($string)
+			|| static::isHex($string)     || static::isBinary($string)
 			|| static::isComplex($string)
 			|| parent::isValid($string);
 	}
