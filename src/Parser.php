@@ -49,9 +49,7 @@ class Parser
 	 */
 	public function resolveSymbol($string)
 	{
-		if( OperandFactory::isValid($string) )
-			return OperandFactory::make($string);
-		elseif( OperatorFactory::isValid($string) )
-			return OperatorFactory::make($string);
+		if(OperandFactory::isValid ($string)) return OperandFactory::make($string);
+		if(OperatorFactory::isValid($string)) return OperatorFactory::make($string);
 	}
 }

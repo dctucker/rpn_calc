@@ -9,6 +9,13 @@ use App\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
 
+use App\Notations\Binary;
+use App\Notations\Octal;
+use App\Notations\Decimal;
+use App\Notations\Hexadecimal;
+
+
+
 interface StackOperator   {}
 interface ComplexOperator {}
 interface ScalarOperator  {}
@@ -263,7 +270,7 @@ class Round extends UnaryOperator
 
 abstract class BaseOperator extends UnaryOperator
 {
-	use \App\Bases\Base;
+	use \App\Notations\Base;
 	public function scalar(Scalar $s)
 	{
 		$string = $this->baseSymbol( $s() );
@@ -271,10 +278,10 @@ abstract class BaseOperator extends UnaryOperator
 	}
 }
 
-class Bin extends BaseOperator { use \App\Bases\Binary; }
-class Oct extends BaseOperator { use \App\Bases\Octal; }
-class Dec extends BaseOperator { use \App\Bases\Decimal; }
-class Hex extends BaseOperator { use \App\Bases\Hexidecimal; }
+class Bin extends BaseOperator { use Binary; }
+class Oct extends BaseOperator { use Octal; }
+class Dec extends BaseOperator { use Decimal; }
+class Hex extends BaseOperator { use Hexadecimal; }
 
 class Dump extends UnaryOperator implements UnaryComplex
 {

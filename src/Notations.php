@@ -1,6 +1,29 @@
 <?php
 
-namespace App\Bases;
+namespace App\Notations;
+
+interface Notation
+{
+	public static function regex();
+}
+
+trait Complex
+{
+	public static function regex($string=null)
+	{
+		$pattern = '/^((-?[0-9.]+)([+-]))?([0-9.]+)?i$/';
+		return $string === null ? $pattern : preg_match($pattern, $string);
+	}
+}
+
+trait Alphabetic
+{
+	public static function regex($string=null)
+	{
+		$pattern = "/^[+-]?[^0-9].*$/";
+		return $string === null ? $pattern : preg_match($pattern, $string);
+	}
+}
 
 trait Base
 {
@@ -41,6 +64,11 @@ trait Decimal
 	use Base;
 	static $prefix = "";
 	static $base = 10;
+	public static function regex($string=null)
+	{
+		$pattern = '/^(-?[0-9.]+)$/';
+		return $string === null ? $pattern : preg_match($pattern, $string);
+	}
 }
 
 trait Octal
@@ -50,7 +78,7 @@ trait Octal
 	static $base = 8;
 }
 
-trait Hexidecimal
+trait Hexadecimal
 {
 	use Base;
 	static $prefix = "0x";

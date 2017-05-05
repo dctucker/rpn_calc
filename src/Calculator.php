@@ -59,7 +59,7 @@ class Calculator
 	 */
 	public function display()
 	{
-		return "".$this->stack->peek();
+		return "".$this->stack;
 	}
 
 	/**

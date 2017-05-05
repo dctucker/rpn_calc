@@ -2,6 +2,13 @@
 
 namespace App;
 
+use App\Notations\Octal;
+use App\Notations\Decimal;
+use App\Notations\Hexadecimal;
+use App\Notations\Binary;
+use App\Notations\Complex;
+use App\Notations\Alphabetic;
+
 interface Factory
 {
 	public static function make($string);
@@ -101,6 +108,7 @@ class OperandFactory extends SymbolFactory
 	protected static $namespace = "App\Operands";
 	protected static $valids = [
 		'pi'=>'Pi',
+		'π'=>'Pi',
 		'e'=>'Exp',
 		'i'=>'Complex',
 		'nan'=>'Nan',
@@ -110,39 +118,27 @@ class OperandFactory extends SymbolFactory
 
 	public static function isValid($string)
 	{
-		return static::isDecimal($string) || static::isOctal($string) || static::isHex($string) || static::isBinary($string) || parent::isValid($string);
+		return static::isDecimal($string) || static::isOctal($string)
+			|| static::isHex($string) || static::isBinary($string)
+			|| static::isComplex($string)
+			|| parent::isValid($string);
 	}
 
 	public static function lookupClassname($string)
 	{
-		if( static::isDecimal( $string ) )
-			return "Scalar";
-		if( static::isBinary($string) )
-			return "BinaryScalar";
-		if( static::isOctal($string) )
-			return "OctalScalar";
-		if( static::isHex($string) )
-			return "HexScalar";
+		if(static::isDecimal($string)) return "DecimalScalar";
+		if(static::isBinary ($string)) return "BinaryScalar";
+		if(static::isOctal  ($string)) return "OctalScalar";
+		if(static::isHex    ($string)) return "HexScalar";
+		if(static::isComplex($string)) return "Complex";
+		if(static::isAlphabetic($string))
 		return parent::lookupClassname($string);
 	}
 
-	public static function isHex($string)
-	{
-		return \App\Bases\Hexidecimal::regex($string);
-	}
-
-	public static function isBinary($string)
-	{
-		return \App\Bases\Binary::regex($string);
-	}
-
-	public static function isOctal($string)
-	{
-		return \App\Bases\Octal::regex($string);
-	}
-
-	public static function isDecimal($string)
-	{
-		return preg_match('/^[0-9.]+$/', $string);
-	}
+	public static function isHex($string)     { return Hexadecimal::regex($string); }
+	public static function isBinary($string)  { return Binary::regex($string); }
+	public static function isOctal($string)   { return Octal::regex($string); }
+	public static function isDecimal($string) { return Decimal::regex($string); }
+	public static function isComplex($string) { return Complex::regex($string); }
+	public static function isAlphabetic($string) { return Alphabetic::regex($string); }
 }

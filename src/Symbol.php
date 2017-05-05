@@ -78,7 +78,7 @@ abstract class Operator extends Symbol
 	public abstract function __invoke(...$operands);
 }
 
-abstract class Operand extends Symbol
+abstract class Operand extends Symbol implements \App\Notations\Notation
 {
 	/**
 	 * @param $symbol string representation/value of this symbol

@@ -5,7 +5,13 @@ namespace App\Operands;
 use App\Operand;
 use App\Operator;
 
-class Scalar extends Operand
+use App\Notations\Decimal;
+use App\Notations\Octal;
+use App\Notations\Hexadecimal;
+use App\Notations\Binary;
+use App\Notations\Alphabetic;
+
+abstract class Scalar extends Operand
 {
 	/**
 	 * @return the primitive scalar data
@@ -59,18 +65,26 @@ abstract class BaseScalar extends Scalar
 	}
 }
 
-class OctalScalar  extends BaseScalar { use \App\Bases\Octal; }
-class HexScalar    extends BaseScalar { use \App\Bases\Hexidecimal; }
-class BinaryScalar extends BaseScalar { use \App\Bases\Binary; }
+class DecimalScalar extends Scalar     { use Decimal; }
+class OctalScalar   extends BaseScalar { use Octal; }
+class HexScalar     extends BaseScalar { use Hexadecimal; }
+class BinaryScalar  extends BaseScalar { use Binary; }
 
-class Pi     extends Scalar { public function getValue() { return M_PI; } }
-class Exp    extends Scalar { public function getValue() { return M_E; } }
-class Nan    extends Scalar { public function getValue() { return NAN; } }
-class PosInf extends Scalar { public function getValue() { return INF; } }
-class NegInf extends Scalar { public function getValue() { return -INF; } }
+abstract class Transcendental extends Scalar
+{
+	use Alphabetic;
+}
+
+class Pi     extends Transcendental { public function getValue() { return M_PI; } }
+class Exp    extends Transcendental { public function getValue() { return M_E; } }
+class Nan    extends Transcendental { public function getValue() { return NAN; } }
+class PosInf extends Transcendental { public function getValue() { return INF; } }
+class NegInf extends Transcendental { public function getValue() { return -INF; } }
 
 class Complex extends Operand
 {
+	use \App\Notations\Complex;
+
 	public static $default_format = "rectangular";
 	public $format;
 	public $real;
@@ -83,15 +97,19 @@ class Complex extends Operand
 	 */
 	public function __construct($real, $imag=1)
 	{
-		if( $real instanceof Scalar && $imag instanceof Scalar )
+		if( is_string( $real ) )
+		{
+			$this->setValue( $real );
+		}
+		elseif( $real instanceof Scalar && $imag instanceof Scalar )
 		{
 			$this->real = $real;
 			$this->imag = $imag;
 		}
 		else
 		{
-			$this->real = new Scalar(0);
-			$this->imag = new Scalar($imag);
+			$this->real = new DecimalScalar(0);
+			$this->imag = new DecimalScalar($imag);
 		}
 		$this->format = static::$default_format;
 	}
@@ -102,6 +120,17 @@ class Complex extends Operand
 	public function getValue()
 	{
 		return [ $this->real(), $this->imag() ];
+	}
+
+	public function setValue($string)
+	{
+		$matches = [];
+		preg_match(static::regex(), $string, $matches);
+		//print_r( $matches );
+		$real = $matches[2] ?? 0;
+		$imag = str_replace('+','', ( $matches[3] ?? '' ) . ($matches[4] ?? 1));
+		$this->real = new DecimalScalar( $real );
+		$this->imag = new DecimalScalar( $imag );
 	}
 
 	public function __toString()
@@ -119,11 +148,11 @@ class Complex extends Operand
 	 */
 	public function rectangular()
 	{
-		if( $this->real == '0' )
+		if( $this->real() == 0 )
 		{
-			if( $this->imag == '1' )
+			if( $this->imag() == 1 )
 				return "i";
-			elseif( $this->imag == '-1' )
+			elseif( $this->imag() == -1 )
 				return "-i";
 			else
 				return $this->imag."i";
@@ -132,8 +161,10 @@ class Complex extends Operand
 		$str = "".$this->real;
 		if( $this->imag == '1' )
 			$str .= "+i";
-		elseif( $this->imag != '0' )
-			$str .= $this->imag->sign().abs( $this->imag() )."i";
+		elseif( $this->imag == '-1' )
+			$str .= "-i";
+		elseif( $this->imag() != 0 )
+			$str .= ($this->imag() >= 0 ? '+' : '').$this->imag."i";
 		return $str;
 	}
 
@@ -193,6 +224,6 @@ class Complex extends Operand
 		if( $complex instanceof Operand )
 			return $complex;
 
-		return new Complex( new Scalar($complex[0]), new Scalar($complex[1]) );
+		return new Complex( new DecimalScalar($complex[0]), new DecimalScalar($complex[1]) );
 	}
 }
