@@ -13,14 +13,6 @@ abstract class SymbolFactory implements Factory
 	protected static $namespace;
 
 	/**
-	 * @TODO
-	 */
-	public static function __callStatic($name, $args)
-	{
-		return static::make($name);
-	}
-
-	/**
 	 * factory method, return object based on specified string
 	 * @param $string string identifying which class to load
 	 */
@@ -118,7 +110,7 @@ class OperandFactory extends SymbolFactory
 
 	public static function isValid($string)
 	{
-		return static::isDecimal($string) || static::isHex($string) || static::isBinary($string) || parent::isValid($string);
+		return static::isDecimal($string) || static::isOctal($string) || static::isHex($string) || static::isBinary($string) || parent::isValid($string);
 	}
 
 	public static function lookupClassname($string)
@@ -127,6 +119,8 @@ class OperandFactory extends SymbolFactory
 			return "Scalar";
 		if( static::isBinary($string) )
 			return "BinaryScalar";
+		if( static::isOctal($string) )
+			return "OctalScalar";
 		if( static::isHex($string) )
 			return "HexScalar";
 		return parent::lookupClassname($string);
@@ -134,13 +128,17 @@ class OperandFactory extends SymbolFactory
 
 	public static function isHex($string)
 	{
-		return strpos($string, \App\Bases\Hexidecimal::$prefix) !== false;
-		return preg_match('/^0x[0-9A-Fa-f]+$/', $string);
+		return \App\Bases\Hexidecimal::regex($string);
 	}
 
 	public static function isBinary($string)
 	{
-		return preg_match('/^b[01]+$/', $string);
+		return \App\Bases\Binary::regex($string);
+	}
+
+	public static function isOctal($string)
+	{
+		return \App\Bases\Octal::regex($string);
 	}
 
 	public static function isDecimal($string)
@@ -148,4 +146,3 @@ class OperandFactory extends SymbolFactory
 		return preg_match('/^[0-9.]+$/', $string);
 	}
 }
-

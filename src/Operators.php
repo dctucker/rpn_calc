@@ -263,9 +263,10 @@ class Round extends UnaryOperator
 
 abstract class BaseOperator extends UnaryOperator
 {
+	use \App\Bases\Base;
 	public function scalar(Scalar $s)
 	{
-		$string = static::$prefix.base_convert( $s(), 10, static::$base );
+		$string = $this->baseSymbol( $s() );
 		return OperandFactory::make( $string );
 	}
 }

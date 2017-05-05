@@ -55,7 +55,7 @@ abstract class BaseScalar extends Scalar
 
 	public function setValue($value)
 	{
-		$this->symbol = static::$prefix.base_convert( $value, 10, static::$base );
+		$this->symbol = $this->baseSymbol( $value );
 	}
 }
 
