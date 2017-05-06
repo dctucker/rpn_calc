@@ -44,7 +44,7 @@ trait Degrees
 	use Regex;
 	public static function pattern()
 	{
-		return '/^([0-9.]+)deg$/';
+		return '/^(-?[0-9.]+)deg$/';
 	}
 	public function degSymbol($number)
 	{

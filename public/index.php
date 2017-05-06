@@ -1,38 +1,17 @@
 <html charset='utf8'>
 <head>
 <title>RPN Calc</title>
-<script>
-function append(o){
-	document.getElementById('q').value += o + ' ';
-	e.focus();
-}
-function operator(o){
-	var e = document.getElementById('q');
-	var val = e.value.trim().split(' ');
-	var d = val.push(o);
-	e.value = val.join(' ') + " ";
-	e.focus();
-}
-function digit(d){
-	var e = document.getElementById('q');
-	var val = e.value;
-	e.value = val + d;
-	e.focus();
-}
-function del(o){
-	var e = document.getElementById('q');
-	var val = e.value.trim().split(' ');
-	var d = val.pop();
-	e.value = val.join(' ') + " ";
-	e.focus();
-}
-</script>
 <style>
+* {
+	font-family: sans-serif;
+}
 .parser {
-	background-color: #444;
+	font-family: monospace;
+	background-color: #354;
 	color: #ddd;
-	padding: 4px;
+	padding: 8px;
 	font-size: 11pt;
+	border: 2px inset #798;
 }
 .display {
 	background-color: #bcb;
@@ -81,11 +60,11 @@ input:focus {
 .operator, .operand {
 	border: 1px outset #ccc;
 	display:inline-block;
-	margin: 4px;
-	padding: 10px;
+	margin: 2px;
+	padding: 4px;
 	background-color: #eee;
-	width: 3em;
-	height: 2em;
+	width: 60px;
+	height: 40px;
 	line-height: 2em;
 	vertical-align: middle;
 	text-align: center;
@@ -94,7 +73,6 @@ input:focus {
 .cell {
 	display:inline-block;
 	vertical-align:top;
-	max-width: 300px;
 }
 a {
 	color: #000;
@@ -115,33 +93,64 @@ a:active div {
 .part    div { background-color: #eee0d2; }
 .stack   div { background-color: #dce; }
 </style>
+<script>
+function append(o){
+	document.getElementById('q').value += o + ' ';
+	e.focus();
+}
+function operator(o){
+	var e = document.getElementById('q');
+	var val = e.value.trim().split(' ');
+	var d = val.push(o);
+	e.value = val.join(' ') + " ";
+	e.focus();
+}
+function digit(d){
+	var e = document.getElementById('q');
+	var val = e.value;
+	e.value = val + d;
+	e.focus();
+}
+function del(o){
+	var e = document.getElementById('q');
+	var val = e.value.trim().split(' ');
+	var d = val.pop();
+	e.value = val.join(' ') + " ";
+	e.focus();
+}
+</script>
 </head>
 <body>
+<?php
+
+require_once('../autoload.php');
+
+use App\Parser;
+use App\Calculator;
+use App\NonCommutativeStack as Stack;
+
+$q = $_GET['q'] ?? '';
+
+$calc   = new Calculator( new Stack );
+$parser = new Parser( $calc );
+
+$parser->verbose = true;
+ob_start();
+$parser->parse($q);
+$parser_output = ob_get_contents();
+ob_end_clean();
+
+?>
 
 	<h1>RPN Calculator</h1>
-	<h2>Parser output</h2>
-	<pre class='parser'><?php
 
-		require_once('../autoload.php');
+	<div class='cell'>
 
-		use App\Parser;
-		use App\Calculator;
-		use App\NonCommutativeStack as Stack;
-		
-		$q = $_GET['q'] ?? '';
-
-		$calc = new Calculator( new Stack );
-		$parser = new Parser( $calc );
-
-		$parser->verbose = true;
-		$parser->parse($q);
-
-	?></pre>
 	<h2>Calculator display and input</h2>
 	<div class='display'><?= $calc->display() ?: '&nbsp;'; ?></div>
 
 	<form>
-		<input autofocus onfocus="this.value = this.value.trim() + ' ';" size="60" id="q" name="q" value="<?= $q ?>" />
+		<input autofocus onfocus="this.value = this.value.trim() + ' ';" size="40" id="q" name="q" value="<?= $q ?>" />
 		<button class='button'>Enter</button>
 		<button class='button' onclick="javascript:del();return false;">&larr;</button>
 	</form>
@@ -247,6 +256,15 @@ a:active div {
 				</div>
 			</a>
 		<?php endforeach; */ ?>
+	</div>
+
+	</div>
+
+	<div class='cell'>
+
+	<h2>Parser output</h2>
+	<pre class='parser'><?= $parser_output ?></pre>
+
 	</div>
 
 		<?php /* foreach( App\OperatorFactory::reference() as $op ): ?>
