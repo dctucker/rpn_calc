@@ -24,6 +24,7 @@ class OperandTest extends TestCase
 
 		$operand = OperandFactory::make('-inf');
 		$this->assertEquals(-INF, $operand());
+		$this->assertEquals('-', $operand->sign());
 
 		$this->assertEquals(255, OperandFactory::make("0xff")());
 		$this->assertEquals(255, OperandFactory::make("b11111111")());
@@ -41,5 +42,30 @@ class OperandTest extends TestCase
 		$this->assertEquals("2.2360679774998exp63.434948822922deg", "".$operand);
 		$operand->format = "";
 		$this->assertEquals("1,2i", "".$operand);
+
+		$operand = OperandFactory::make('1+i');
+		$this->assertEquals("1+i", $operand);
+		$operand = OperandFactory::make('1-i');
+		$this->assertEquals("1-i", $operand);
+		$operand = OperandFactory::make('i');
+		$this->assertEquals("i", $operand);
+		$operand = OperandFactory::make('0-i');
+		$this->assertEquals("-i", $operand);
+		$operand = OperandFactory::make('3i');
+		$this->assertEquals("3i", $operand);
+
+		$this->assertNotEmpty( \App\Notations\Regex::pattern() );
+	}
+
+	public function testCallInvalidOperand()
+	{
+		$this->expectException(\Exception::class);
+		$operand = OperandFactory::make('1+2i');
+		$operand->re();
+	}
+
+	public function testInvalidOperand()
+	{
+		$this->assertEmpty( OperandFactory::lookupClassName("09sa") );
 	}
 }

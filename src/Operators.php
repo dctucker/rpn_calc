@@ -88,6 +88,7 @@ class Push extends Operator implements StackOperator
 	 * incoming operand will duplicated.
 	 * @param $operand mixed item to duplicate
 	 * @return Generator
+	 * @codeCoverageIgnore
 	 */
 	public function __invoke(...$operands)
 	{

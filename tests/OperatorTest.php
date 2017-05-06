@@ -26,6 +26,8 @@ class OperatorTest extends TestCase
 		$minus = OperatorFactory::make('-');
 		$ret = $minus( O(123), O(456) );
 		$this->assertEquals( 123-456, $ret() );
+
+		$this->assertNotEmpty( OperatorFactory::make('dump')(O(1)) );
 	}
 
 	/**
@@ -83,6 +85,22 @@ class OperatorTest extends TestCase
 		}
 	}
 
+	public function testComplexScalarOperators()
+	{
+		$this->assertEquals( O("2+11i"), OperatorFactory::make('^')( O(3), O("2+i") ) );
+		$this->assertEquals( O("2+11i"), OperatorFactory::make('^')( O("2+i"), O(3) ) );
+		$this->assertEquals( O("6+3i") , OperatorFactory::make('*')( O("2+i"), O(3) ) );
+		$this->assertEquals( O("6+i")  , OperatorFactory::make('+')( O("2+i"), O(4) ) );
+
+		$ln = OperatorFactory::make('ln')( O("100+100i") );
+		$log= OperatorFactory::make('nthlog')( O("100+100i"), O('e') );
+		$this->assertEquals( $log , $ln );
+
+		$ln = OperatorFactory::make('ln')( O("100") );
+		$log= OperatorFactory::make('nthlog')( O("100"), O('e') );
+		$this->assertEquals( $log , $ln );
+	}
+
 
 	public function testScalarMethods()
 	{
@@ -129,6 +147,16 @@ class OperatorTest extends TestCase
 		$this->assertEquals([0,-1], OperatorFactory::make('-')->complex(O("2i"),O("3i")));
 		$this->assertEquals([-6,0], OperatorFactory::make('*')->complex(O("2i"),O("3i")));
 		$this->assertEquals([2/3,0], OperatorFactory::make('/')->complex(O("2i"),O("3i")));
+
+		$ret = OperatorFactory::make('/')->complex(O("2i"),O("0i"));
+		$this->assertNotEmpty( $ret );
+		$this->assertNan( $ret[0] );
+		$this->assertNan( $ret[1] );
+
+		$ret = OperatorFactory::make('1/x')->complex(O("0i"));
+		$this->assertNotEmpty( $ret );
+		$this->assertNan( $ret[0] );
+		$this->assertNan( $ret[1] );
 	}
 
 	public function testBaseConversion()
@@ -137,5 +165,43 @@ class OperatorTest extends TestCase
 		$this->assertEquals("o377", OperatorFactory::make('oct')->scalar(O(255)));
 		$this->assertEquals("b11111111", OperatorFactory::make('bin')->scalar(O(255)));
 		$this->assertEquals("255", OperatorFactory::make('dec')->scalar(O(255)));
+	}
+
+
+	public function generator()
+	{
+		yield 'A';
+	}
+
+	public function testSymbolGeneratorHelper()
+	{
+		$operator = OperatorFactory::make('+');
+		$generator = $this->generator();
+		$ret = $operator->generate( $generator );
+		$this->assertNotEmpty( $ret );
+		$ret = $operator->generate( 'A' );
+		$this->assertNotEmpty( $ret );
+	}
+
+	public function testCallInvalidOperation()
+	{
+		$this->expectException(\Exception::class);
+		$operation = OperatorFactory::make('+');
+		$operation->re();
+	}
+
+	public function testStackOperators()
+	{
+		$operator = OperatorFactory::make('push');
+		$ret = $operator("A");
+		$this->assertNotEmpty($ret);
+
+		$this->assertNotEmpty( OperatorFactory::make('dump')( OperandFactory::make('i') ) );
+	}
+
+	public function testInvalidOperator()
+	{
+		$this->expectException(\Exception::class);
+		$this->assertEmpty( OperatorFactory::make('something') );
 	}
 }

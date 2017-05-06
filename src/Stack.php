@@ -39,6 +39,7 @@ class GeneratorStack implements Stack
 	 * pop n items from the stack
 	 * @param $n integer number of items to pop from the stack
 	 * @return Generator
+	 * @codeCoverageIgnore
 	 */
 	public function pop($n = 1)
 	{

@@ -57,6 +57,7 @@ abstract class Operator extends Symbol
 	/**
 	 * helper to turn variable arguments into a Generator
 	 * @return Generator
+	 * @codeCoverageIgnore
 	 */
 	public function generate($a)
 	{
@@ -116,7 +117,7 @@ abstract class Operand extends Symbol implements \App\Notations\Notation
 		if( property_exists( $this, $name ) )
 			return $this->$name->getValue();
 		else
-			throw new \Exception("Attribute not found: $string");
+			throw new \Exception("Attribute not found: $name");
 	}
 
 	/**
