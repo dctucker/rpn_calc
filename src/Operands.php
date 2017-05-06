@@ -65,10 +65,10 @@ abstract class BaseScalar extends Scalar
 	}
 }
 
-class DecimalScalar extends Scalar     { use Decimal; }
-class OctalScalar   extends BaseScalar { use Octal; }
-class HexScalar     extends BaseScalar { use Hexadecimal; }
-class BinaryScalar  extends BaseScalar { use Binary; }
+class DecScalar extends Scalar     { use Decimal; }
+class OctScalar extends BaseScalar { use Octal; }
+class HexScalar extends BaseScalar { use Hexadecimal; }
+class BinScalar extends BaseScalar { use Binary; }
 
 abstract class Constant extends Scalar
 {
@@ -108,8 +108,8 @@ class Complex extends Operand
 		}
 		else
 		{
-			$this->real = new DecimalScalar(0);
-			$this->imag = new DecimalScalar($imag);
+			$this->real = new DecScalar(0);
+			$this->imag = new DecScalar($imag);
 		}
 		$this->format = static::$default_format;
 	}
@@ -127,8 +127,8 @@ class Complex extends Operand
 		$matches = static::regex($string);
 		$real = $matches[2] ?? 0;
 		$imag = str_replace('+','', ( $matches[3] ?? '' ) . ($matches[4] ?? 1));
-		$this->real = new DecimalScalar( $real );
-		$this->imag = new DecimalScalar( $imag );
+		$this->real = new DecScalar( $real );
+		$this->imag = new DecScalar( $imag );
 	}
 
 	public function __toString()
@@ -222,6 +222,6 @@ class Complex extends Operand
 		if( $complex instanceof Operand )
 			return $complex;
 
-		return new Complex( new DecimalScalar($complex[0]), new DecimalScalar($complex[1]) );
+		return new Complex( new DecScalar($complex[0]), new DecScalar($complex[1]) );
 	}
 }

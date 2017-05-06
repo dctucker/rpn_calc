@@ -129,9 +129,9 @@ class OperandFactory extends SymbolFactory
 
 	public static function lookupClassname($string)
 	{
-		if(static::isDecimal($string)) return "DecimalScalar";
-		if(static::isBinary ($string)) return "BinaryScalar";
-		if(static::isOctal  ($string)) return "OctalScalar";
+		if(static::isDecimal($string)) return "DecScalar";
+		if(static::isBinary ($string)) return "BinScalar";
+		if(static::isOctal  ($string)) return "OctScalar";
 		if(static::isHex    ($string)) return "HexScalar";
 		if(static::isComplex($string)) return "Complex";
 		if(static::isAlphabetic($string))

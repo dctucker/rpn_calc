@@ -51,7 +51,7 @@ abstract class Operator extends Symbol
 		if( property_exists( $this, $func ) )
 			return ($this->$func)(...$args);
 		else
-			throw new \Exception("Attribute not found: $string");
+			throw new \Exception("Attribute not found: $func");
 	}
 
 	/**
