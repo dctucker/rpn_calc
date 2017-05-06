@@ -14,10 +14,17 @@ class StackTest extends TestCase
 
 	public function testCanPushAndPop()
 	{
+		$this->stack->push("");
+		$this->stack->push([""]);
 		$a = 'A';
 		$this->stack->push($a);
+		$this->assertEquals("A", $this->stack->peek());
 		$b = $this->stack->pop()->current();
 		$this->assertEquals($b, $a);
+		$this->stack->clear();
+		$this->assertEmpty( $this->stack->all() );
+		$this->stack->pop(0);
+		$this->stack->pop(2);
 	}
 
 	public function testPopStack()
@@ -32,6 +39,5 @@ class StackTest extends TestCase
 		$popped = $this->ncstack->pop(0);
 		foreach( $popped as $pop )
 			$this->assertGreaterThan(0, $this->ncstack->size());
-
 	}
 }

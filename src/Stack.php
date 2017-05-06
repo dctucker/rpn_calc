@@ -43,7 +43,9 @@ class GeneratorStack implements Stack
 	public function pop($n = 1)
 	{
 		for( $i = 0; $i < $n; $i++ )
+		{
 			yield array_pop( $this->stack );
+		}
 	}
 
 	/**

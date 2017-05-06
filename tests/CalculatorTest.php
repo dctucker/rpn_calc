@@ -5,6 +5,10 @@ use App\Calculator;
 use App\Parser;
 use App\NonCommutativeStack as Stack;
 
+class S extends App\Symbol
+{
+}
+
 class CalculatorTest extends TestCase
 {
 	public function testCreateCalculator()
@@ -22,6 +26,23 @@ class CalculatorTest extends TestCase
 		$calc->push( new App\Operators\Times("*") );
 		$this->assertEquals( 123 * 456, $calc->display() );
 		$this->assertEquals( 56088, $calc->display() );
+
+		$calc->setComplexFormat('polar');
+		$calc->setComplexFormat('rectangular');
+		$calc->push(new S(''));
+		$calc->push( new App\Operands\Complex("2+3i") );
+		$calc->push( new App\Operands\Complex("2+3i") );
+		$calc->push( new App\Operators\Power("^") );
+	}
+
+	public function testParser()
+	{
+		$parser = new Parser( new Calculator( new Stack ) );
+		$parser->verbose = true;
+		$this->assertNotEmpty( $parser );
+		$parser->parse("+");
+		$parser->parse("");
+		$parser->parse("something");
 	}
 }
 
