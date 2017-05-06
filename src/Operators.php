@@ -258,6 +258,8 @@ class Modulo extends BinaryOperator
 {
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
+		if( $s2() == 0 )
+			return NAN;
 		return $s1() % $s2();
 	}
 }

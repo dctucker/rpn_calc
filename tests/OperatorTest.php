@@ -112,6 +112,7 @@ class OperatorTest extends TestCase
 		$this->assertEquals(     2**7, OperatorFactory::make('^')->scalar(O( 2),O( 7 )));
 		$this->assertEquals(        8, OperatorFactory::make('sqrt')->scalar(O(64)));
 		$this->assertEquals(        3, OperatorFactory::make('mod')->scalar(O( 11),O( 4 )));
+		$this->assertNan(              OperatorFactory::make('mod')->scalar(O( 5),O(0)));
 		$this->assertEquals(        3, OperatorFactory::make('int')->scalar(O( 3.9 )));
 		$this->assertEquals(      0.9, OperatorFactory::make('frac')->scalar(O( 3.9 )));
 		$this->assertEquals(        1, OperatorFactory::make('round')->scalar(O( 0.9 )));
