@@ -10,6 +10,7 @@ use App\Notations\Octal;
 use App\Notations\Hexadecimal;
 use App\Notations\Binary;
 use App\Notations\Alphabetic;
+use App\Notations\Degrees;
 
 abstract class Scalar extends Operand
 {
@@ -69,6 +70,17 @@ class DecScalar extends Scalar     { use Decimal; }
 class OctScalar extends BaseScalar { use Octal; }
 class HexScalar extends BaseScalar { use Hexadecimal; }
 class BinScalar extends BaseScalar { use Binary; }
+
+class DegScalar extends Scalar
+{
+	use Degrees;
+	public function getValue()
+	{
+		$raw_part = str_replace('deg','',$this->symbol); //substr( $this->symbol, strlen(static::$prefix) );
+		return deg2rad( $raw_part );
+	}
+}
+
 
 abstract class Constant extends Scalar
 {

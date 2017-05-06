@@ -140,6 +140,10 @@ class OperatorTest extends TestCase
 		$this->assertEquals(      -20, OperatorFactory::make('conj')->scalar(O(-20)));
 		$this->assertEquals(       20, OperatorFactory::make('re')->scalar(O(20)));
 		$this->assertEquals(        0, OperatorFactory::make('im')->scalar(O(20)));
+
+		$deg180 = O('180deg');
+		$this->assertEquals(     M_PI, OperatorFactory::make('deg')->scalar($deg180)());
+		$this->assertEquals(     M_PI, OperatorFactory::make('rad')->scalar($deg180)());
 	}
 
 	public function testComplexMethods()

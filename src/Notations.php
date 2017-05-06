@@ -39,6 +39,19 @@ trait Complex
 	}
 }
 
+trait Degrees
+{
+	use Regex;
+	public static function pattern()
+	{
+		return '/^([0-9.]+)deg$/';
+	}
+	public function degSymbol($number)
+	{
+		return rad2deg($number)."deg";
+	}
+}
+
 trait Alphabetic
 {
 	use Regex;

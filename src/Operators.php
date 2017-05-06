@@ -8,7 +8,7 @@ use App\OperandFactory;
 use App\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
-
+use App\Notations\Degrees;
 use App\Notations\Binary;
 use App\Notations\Octal;
 use App\Notations\Decimal;
@@ -494,6 +494,23 @@ class Tan extends TrigOperator implements UnaryComplex
 	public function complex(Complex $c)
 	{
 		return $this->div( $this->sin($c) , $this->cos($c) );
+	}
+}
+
+class Degree extends TrigOperator
+{
+	use Degrees;
+	public function scalar(Scalar $s)
+	{
+		return OperandFactory::make( $this->degSymbol( $s() ) );
+	}
+}
+
+class Radian extends TrigOperator
+{
+	public function scalar(Scalar $s)
+	{
+		return OperandFactory::make($s());
 	}
 }
 

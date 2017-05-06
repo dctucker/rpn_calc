@@ -36,6 +36,13 @@ function del(o){
 }
 .display {
 	background-color: #bcb;
+	background: repeating-linear-gradient(
+		to right,
+		#bbccbb,
+		#bbccbb 15px,
+		#b0c0b0 15px,
+		#b0c0b0 30px
+	);
 }
 .display, input {
 	color: #252;
@@ -56,7 +63,7 @@ input:focus {
 	font-size: 16pt;
 	background-color: #655;
 	color: #fff;
-	border-radius: 8px;
+	border-radius: 4px;
 	padding: 7px 8px;
 	border: 2px outset #544;
 	display:inline-block;
@@ -82,6 +89,7 @@ input:focus {
 	line-height: 2em;
 	vertical-align: middle;
 	text-align: center;
+	border-radius: 4px;
 }
 .cell {
 	display:inline-block;
@@ -119,19 +127,21 @@ a:active div {
 		use App\Parser;
 		use App\Calculator;
 		use App\NonCommutativeStack as Stack;
+		
+		$q = $_GET['q'] ?? '';
 
 		$calc = new Calculator( new Stack );
 		$parser = new Parser( $calc );
 
 		$parser->verbose = true;
-		$parser->parse($_GET['q']);
+		$parser->parse($q);
 
 	?></pre>
 	<h2>Calculator display and input</h2>
-	<div class='display'><?= $calc->display(); ?></div>
+	<div class='display'><?= $calc->display() ?: '&nbsp;'; ?></div>
 
 	<form>
-		<input autofocus onfocus="this.value = this.value.trim() + ' ';" size="60" id="q" name="q" value="<?= $_GET['q'] ?>" />
+		<input autofocus onfocus="this.value = this.value.trim() + ' ';" size="60" id="q" name="q" value="<?= $q ?>" />
 		<button class='button'>Enter</button>
 		<button class='button' onclick="javascript:del();return false;">&larr;</button>
 	</form>
@@ -202,7 +212,7 @@ a:active div {
 			<a class='op' href="javascript:operator('-')"><div class='operator'>-</div></a>
 			<br />
 			<span class='trig'>
-				<a href="javascript:append('-inf')"><div class='operand'>-inf</div></a>
+				<a href="javascript:operator('deg')"><div class='operand'>deg</div></a>
 				<a href="javascript:operator('sin')"><div class='operator'>sin</div></a>
 				<a href="javascript:operator('cos')"><div class='operator'>cos</div></a>
 				<a href="javascript:operator('tan')"><div class='operator'>tan</div></a>
@@ -216,7 +226,7 @@ a:active div {
 			<a class='op' href="javascript:operator('+')"><div class='operator'>+</div></a>
 			<br />
 			<span class='trig'>
-				<a href="javascript:append('+inf')"><div class='operand'>+inf</div></a>
+				<a href="javascript:operator('rad')"><div class='operand'>rad</div></a>
 				<a href="javascript:digit('e')"><div class='operand'>e</div></a>
 				<a href="javascript:digit('i')"><div class='operand'>i</div></a>
 				<a href="javascript:digit('π')"><div class='operand'>π</div></a>
