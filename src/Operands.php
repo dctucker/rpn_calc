@@ -79,6 +79,10 @@ class DegScalar extends Scalar
 		$raw_part = str_replace('deg','',$this->symbol); //substr( $this->symbol, strlen(static::$prefix) );
 		return deg2rad( $raw_part );
 	}
+	public function setValue($value)
+	{
+		$this->symbol = $this->degSymbol( $value );
+	}
 }
 
 
