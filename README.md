@@ -1,24 +1,29 @@
 # rpn_calc
 Reverse Polish Notation calculator written for PHP 7.0
 
-Goals:
+## Goals
 - Target PHP 7.0
 - Minimize external dependencies
 - 100% code coverage with unit tests
 
-Structure:
-- Symbol
-  - Operand
-    - Scalar
+## Code coverage report
+
+https://htmlpreview.github.io/?https://github.com/dctucker/rpn_calc/blob/master/coverage/index.html
+
+## Class Structure
+
+- App\Symbol
+  - App\Operand
+    - App\Operands\Scalar
       - DecScalar
       - DegScalar
       - Constant
       - BaseScalar
         - HexScalar, OctScalar, BinScalar
-    - Complex
+    - App\Operands\Complex
       - PolarComplex
-  - Operator
-    - UnaryOperator
+  - App\Operator
+    - App\Operators\UnaryOperator
       - BaseOperator
         - Bin, Oct, Hex, Dec
       - Dump
@@ -27,11 +32,11 @@ Structure:
       - TrigOperator
         - Sin, Cos, Tan, Degree, Radian
         - Mag, Arg, Conj, RealPart ImagPart
-    - BinaryOperator
+    - App\Operators\BinaryOperator
       - Push, Pop, Swap
       - Plus, Minus, Times, Divide, Modulo
       - Power, Sqrt, NthLog
-    - interfaces
+    - App\Operators\(interfaces)
       - StackOperator
       - ScalarOperator
         - UnaryScalar
@@ -40,18 +45,18 @@ Structure:
         - UnaryComplex
         - BinaryComplex
         - BinaryComplexScalar    
-- SymbolFactory
+- App\SymbolFactory
   - OperatorFactory
   - OperandFactory
-- Notation (traits)
+- App\Notations\Notation (interface)
   - Regex
     - Base
       - Decimal, Octal, Hexadecimal, Binary
     - Complex, PolarComplex
     - Degrees
     - Alphabetic
-- Stack
+- App\Stack (interface)
   - GeneratorStack
   - NonCommutativeStack
-- Calculator
-- Parser
+- App\Calculator
+- App\Parser
