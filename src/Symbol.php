@@ -5,7 +5,7 @@ namespace App;
 abstract class Symbol
 {
 	public $symbol;
-	public $required_interface = "";
+	static $required_interface = "";
 
 	/**
 	 * @param $symbol string representation/value of this symbol
@@ -28,8 +28,13 @@ abstract class Symbol
 		array_pop( $names );
 		$names[] = $string;
 		$interface = implode("\\", $names);
-		$this->required_interface = $string;
+		static::$required_interface = $string;
 		return $this instanceof $interface;
+	}
+
+	public function getRequiredInterface()
+	{
+		return static::$required_interface;
 	}
 
 	public function __toString()

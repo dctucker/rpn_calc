@@ -48,7 +48,8 @@ class Calculator
 		if( $result === false )
 		{
 			$this->restore();
-			$this->warning = "Operator '$operator' not supported for the given operands ($operator->required_interface)";
+			$required_interface = $operator->getRequiredInterface();
+			$this->warning = "Operator '$operator' not supported for the given operands ($required_interface)";
 			return false;
 		}
 		return $this->stack->push( $result );
@@ -60,15 +61,6 @@ class Calculator
 	public function display()
 	{
 		return "".$this->stack;
-	}
-
-	/**
-	 * set format to be used by complex numbers
-	 * @param $f string can be polar or rectangular
-	 */
-	public function setComplexFormat($f)
-	{
-		Operands\Complex::$default_format = $f;
 	}
 
 	/**

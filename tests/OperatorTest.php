@@ -83,12 +83,15 @@ class OperatorTest extends TestCase
 					$result = iterator_to_array( $result );
 			}
 		}
+		$this->assertEquals( O('-2i'), OperatorFactory::make('/')( O( 2), O('i') ) );
+		$this->assertEquals( O('i'), new App\Operands\Complex([0,1]) );
+		$this->assertEquals( O('0+0i'), new App\Operands\Complex(0) );
 	}
 
 	public function testComplexScalarOperators()
 	{
-		$this->assertEquals( O("2+11i"), OperatorFactory::make('^')( O(3), O("2+i") ) );
-		$this->assertEquals( O("2+11i"), OperatorFactory::make('^')( O("2+i"), O(3) ) );
+		//$this->assertEquals( O("1cis0deg"), OperatorFactory::make('^')( O('1'), O('i') ) );
+		//$this->assertEquals( O("2+11i"), OperatorFactory::make('^')( O("2+i"), O(3) ) );
 		$this->assertEquals( O("6+3i") , OperatorFactory::make('*')( O("2+i"), O(3) ) );
 		$this->assertEquals( O("6+i")  , OperatorFactory::make('+')( O("2+i"), O(4) ) );
 
@@ -162,6 +165,13 @@ class OperatorTest extends TestCase
 		$this->assertNotEmpty( $ret );
 		$this->assertNan( $ret[0] );
 		$this->assertNan( $ret[1] );
+
+		$this->assertEquals( O('0.5i'), OperatorFactory::make('/')(O("i"),O("2")) );
+		$this->assertEquals( O('-0.6366197723675813430755350534900574481378385829618257949i'), OperatorFactory::make('nthlog')(O('e'),O('i')) );
+
+		$this->assertEquals( O('-1+0i')(), OperatorFactory::make('^')(O('i'),O('2'))() );
+		$ipi = OperatorFactory::make('*')(O('i'),O('pi'));
+		$this->assertEquals( O('-1+0i')(), OperatorFactory::make('^')(O('e'),$ipi)() );
 	}
 
 	public function testBaseConversion()
@@ -208,5 +218,15 @@ class OperatorTest extends TestCase
 	{
 		$this->expectException(\Exception::class);
 		$this->assertEmpty( OperatorFactory::make('something') );
+	}
+
+	public function testCommutativity()
+	{
+		$plus = OperatorFactory::make('+');
+		$this->assertEquals( $plus(O(2),O('i')), $plus(O('i'),O(2)) );
+
+		$plus = OperatorFactory::make('*');
+		$this->assertEquals( $plus(O(2),O('i')), $plus(O('i'),O(2)) );
+
 	}
 }

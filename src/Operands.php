@@ -88,6 +88,11 @@ class DegScalar extends Scalar
 abstract class Constant extends Scalar
 {
 	use Alphabetic;
+	public function operate(Operator $op, $other = null)
+	{
+		$doppelganger = new DecScalar( $this->getValue() );
+		return $doppelganger->operate($op, $other);
+	}
 }
 
 class Pi     extends Constant { public function getValue() { return M_PI; } }
@@ -100,17 +105,15 @@ class Complex extends Operand
 {
 	use \App\Notations\Complex;
 
-	public static $default_format = "rectangular";
-	public $format;
 	public $real;
 	public $imag;
 
 	/**
-	 * initialize this Complex real and imag components, and default format
+	 * initialize this Complex real and imag components
 	 * @param $real mixed
 	 * @param $imag Scalar or double - defaults to one
 	 */
-	public function __construct($real, $imag=1)
+	public function __construct($real, $imag=0)
 	{
 		if( is_array( $real ) )
 		{
@@ -121,17 +124,16 @@ class Complex extends Operand
 		{
 			$this->setValue( $real );
 		}
+		elseif( is_numeric( $real ) && is_numeric( $imag ) )
+		{
+			$this->real = new DecScalar( $real );
+			$this->imag = new DecScalar( $imag );
+		}
 		elseif( $real instanceof Scalar && $imag instanceof Scalar )
 		{
 			$this->real = $real;
 			$this->imag = $imag;
 		}
-		else
-		{
-			$this->real = new DecScalar(0);
-			$this->imag = new DecScalar($imag);
-		}
-		$this->format = static::$default_format;
 	}
 
 	/**
@@ -147,8 +149,8 @@ class Complex extends Operand
 		$matches = static::regex($string);
 		$real = $matches[2] ?? 0;
 		$imag = str_replace('+','', ( $matches[3] ?? '' ) . ($matches[4] ?? 1));
-		$this->real = new DecScalar( $real );
-		$this->imag = new DecScalar( $imag );
+		$this->real = new DecScalar( $real * 1 );
+		$this->imag = new DecScalar( $imag * 1 );
 	}
 
 	public function __toString()
@@ -226,17 +228,37 @@ class Complex extends Operand
 
 class PolarComplex extends Complex
 {
-	public function __construct($mag, $arg)
+	use \App\Notations\PolarComplex;
+	public function __construct($mag, $arg=null)
+	{
+		if( is_string( $mag ) && $arg === null )
+		{
+			$this->setValue($mag);
+		}
+		else
+		{
+			$this->setMagArg( $mag, $arg );
+		}
+	}
+
+	public function setValue($string)
+	{
+		$matches = static::regex($string);
+		$this->setMagArg( $matches[1], deg2rad($matches[2]) );
+	}
+
+	public function setMagArg($mag, $arg)
 	{
 		$real = $mag * cos( $arg );
 		$imag = $mag * sin( $arg );
 		if( abs($real) < 1e-10 ) $real = 0;
 		if( abs($imag) < 1e-10 ) $imag = 0;
-		parent::__construct( $real, $imag );
+		$this->real = new DecScalar($real);
+		$this->imag = new DecScalar($imag);
 	}
 
 	public function __toString()
 	{
-		return $this->mag()."e^".rad2deg($this->arg())."deg*i";
+		return $this->mag()."cis".rad2deg($this->arg())."deg";
 	}
 }

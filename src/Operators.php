@@ -144,10 +144,10 @@ trait AddComplex
 
 	public function scalarComplex(Scalar $s, Complex $c)
 	{
-		return [
+		return new Complex([
 			$this->scalar( $s, $c->real ),
 			$c->imag(),
-		];
+		]);
 	}
 }
 
@@ -213,7 +213,7 @@ class Divide extends BinaryOperator implements BinaryComplex, BinaryComplexScala
 	{
 		if( $s2() == 0 )
 			return NAN;
-		return $this->times( $s1(), $this->recip( $s2() ) );
+		return $this->times->scalar( $s1, $this->recip( $s2 ) );
 	}
 
 	public function complex(Complex $c1, Complex $c2)
@@ -227,15 +227,14 @@ class Divide extends BinaryOperator implements BinaryComplex, BinaryComplexScala
 		if( $cc + $dd == 0 )
 			return [NAN,NAN];
 		return [
-			($ac + $bd) / ($cc + $dd),
-			($bc - $ad) / ($cc + $dd)
+			($ac + $bd) / ( $cc + $dd ),
+			($bc - $ad) / ( $cc + $dd )
 		];
 	}
 
 	public function scalarComplex(Scalar $s, Complex $c)
 	{
-		$ret = $this->times->complexScalar( $this->recip( $c ), $s );
-		return new Complex( $ret[0], $ret[1] );
+		return  $this->times->scalarComplex( $s, $c->operate($this->recip) );
 	}
 
 	public function complexScalar(Complex $c, Scalar $s)
@@ -415,7 +414,7 @@ class Power extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 	}
 	public function scalarComplex(Scalar $s, Complex $c)
 	{
-		return new Complex( $this->complex( OperandFactory::make($s().'+0i'), $c ) );
+		return $this->complex( OperandFactory::make($s().'+0i'), $c );
 	}
 }
 class Sqrt extends UnaryOperator implements UnaryComplex
@@ -473,6 +472,9 @@ class NthLog extends BinaryOperator implements BinaryComplexScalar
 	}
 	public function scalarComplex(Scalar $s, Complex $c)
 	{
+		$div = OperatorFactory::make('/');
+		$ln = OperatorFactory::make('ln');
+		return $div( $s->operate($ln), $c->operate($ln) );
 	}
 }
 

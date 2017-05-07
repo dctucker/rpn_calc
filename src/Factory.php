@@ -7,6 +7,7 @@ use App\Notations\Decimal;
 use App\Notations\Hexadecimal;
 use App\Notations\Binary;
 use App\Notations\Complex;
+use App\Notations\PolarComplex;
 use App\Notations\Degrees;
 use App\Notations\Alphabetic;
 
@@ -126,7 +127,8 @@ class OperandFactory extends SymbolFactory
 	{
 		return static::isDecimal($string) || static::isOctal($string)
 			|| static::isHex($string)     || static::isBinary($string)
-			|| static::isComplex($string) || static::isDegrees($string)
+			|| static::isDegrees($string)
+			|| static::isComplex($string) || static::isPolarComplex($string)
 			|| parent::isValid($string);
 	}
 
@@ -137,6 +139,7 @@ class OperandFactory extends SymbolFactory
 		if(static::isOctal  ($string)) return "OctScalar";
 		if(static::isHex    ($string)) return "HexScalar";
 		if(static::isComplex($string)) return "Complex";
+		if(static::isPolarComplex($string)) return "PolarComplex";
 		if(static::isDegrees($string)) return "DegScalar";
 		if(static::isAlphabetic($string))
 		return parent::lookupClassname($string);
@@ -147,6 +150,7 @@ class OperandFactory extends SymbolFactory
 	public static function isOctal($string)   { return Octal::regex($string); }
 	public static function isDecimal($string) { return Decimal::regex($string); }
 	public static function isComplex($string) { return Complex::regex($string); }
+	public static function isPolarComplex($string) { return PolarComplex::regex($string); }
 	public static function isDegrees($string) { return Degrees::regex($string); }
 	public static function isAlphabetic($string) { return Alphabetic::regex($string); }
 }

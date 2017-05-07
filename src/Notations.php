@@ -35,7 +35,16 @@ trait Complex
 	use Regex;
 	public static function pattern()
 	{
-		return '/^((-?[0-9.]+)([+-]))?([0-9.]+)?i$/';
+		return '/^((-?[0-9.]+)([+-]))?(-?[0-9.]+)?i$/';
+	}
+}
+
+trait PolarComplex
+{
+	use Regex;
+	public static function pattern()
+	{
+		return '/^(-?[0-9.]+)cis(-?[0-9.]+)deg$/';
 	}
 }
 

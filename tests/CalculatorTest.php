@@ -4,9 +4,28 @@ use PHPUnit\Framework\TestCase;
 use App\Calculator;
 use App\Parser;
 use App\NonCommutativeStack as Stack;
+use App\Operator;
+use App\Operators\UnaryOperator;
+use App\Operators\UnaryComplex;
 
 class S extends App\Symbol
 {
+}
+
+class Nop extends UnaryOperator implements UnaryComplex
+{
+	public function __invoke(...$operands)
+	{
+		return false;
+	}
+
+	public function scalar(App\Operands\Scalar $s)
+	{
+	}
+
+	public function complex(App\Operands\Complex $c)
+	{
+	}
 }
 
 class CalculatorTest extends TestCase
@@ -27,8 +46,6 @@ class CalculatorTest extends TestCase
 		$this->assertEquals( 123 * 456, $calc->display() );
 		$this->assertEquals( 56088, $calc->display() );
 
-		$calc->setComplexFormat('polar');
-		$calc->setComplexFormat('rectangular');
 		$calc->push(new S(''));
 		$calc->push( new App\Operands\Complex("2+3i") );
 		$calc->push( new App\Operands\Complex("2+3i") );
@@ -43,6 +60,22 @@ class CalculatorTest extends TestCase
 		$parser->parse("+");
 		$parser->parse("");
 		$parser->parse("something");
+	}
+
+	public function testUnsupportedOperator()
+	{
+		$stack = new Stack;
+		$calc = new Calculator($stack);
+		$calc->push( new App\Operands\DecScalar("123") );
+		$calc->push( new App\Operands\DecScalar("456") );
+		$stack_before = $calc->stack->all();
+
+		$nop = new Nop("NOP");
+		$calc->push( $nop );
+		$this->assertEquals( $stack_before, $calc->stack->all() );
+
+		$c = new App\Operands\Complex('i');
+		$this->assertFalse( $c->operate($nop) );
 	}
 }
 

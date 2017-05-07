@@ -41,10 +41,12 @@ class OperandTest extends TestCase
 		$operand = OperandFactory::make('1+2i');
 		$this->assertEquals([1,2], $operand->getValue());
 		$this->assertEquals("1+2i", "".$operand);
+		/*
 		$operand->format = "polar";
 		$this->assertEquals("2.2360679774998exp63.434948822922deg", "".$operand);
 		$operand->format = "";
 		$this->assertEquals("1,2i", "".$operand);
+		*/
 
 		$operand = OperandFactory::make('1+i');
 		$this->assertEquals("1+i", $operand);
@@ -71,4 +73,12 @@ class OperandTest extends TestCase
 	{
 		$this->assertEmpty( OperandFactory::lookupClassName("09sa") );
 	}
+
+	public function testPolarComplex()
+	{
+		$polar = OperandFactory::make('4cis90deg');
+		$this->assertEquals( OperandFactory::make('4i')(), $polar() );
+		$this->assertEquals( "4cis90deg", $polar );
+	}
+
 }
