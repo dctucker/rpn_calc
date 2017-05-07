@@ -1,0 +1,90 @@
+* {
+	font-family: sans-serif;
+}
+.parser {
+	font-family: monospace;
+	background-color: #354;
+	color: #ddd;
+	padding: 8px;
+	font-size: 11pt;
+	border: 2px inset #798;
+}
+.display {
+	background-color: #bcb;
+	background: repeating-linear-gradient(
+		to right,
+		#bbccbb,
+		#bbccbb 15px,
+		#b0c0b0 15px,
+		#b0c0b0 30px
+	);
+}
+.display, input {
+	color: #252;
+	padding: 4px;
+	font-family:monospace;
+	font-size: 18pt;
+	border: 2px inset #696;
+	outline: none;
+}
+input {
+	background-color: #ada;
+	color: #040;
+}
+input:focus {
+	border-color: #7a7;
+}
+.button {
+	font-size: 16pt;
+	background-color: #655;
+	color: #fff;
+	border-radius: 4px;
+	padding: 7px 8px;
+	border: 2px outset #544;
+	display:inline-block;
+	box-sizing: border-box;
+	line-height: 0.8em;
+	outline: none;
+}
+.button:hover {
+	background-color: #766;
+	cursor: pointer;
+}
+.operators, .operands {
+	font-size: 14pt;
+}
+.operator, .operand {
+	border: 1px outset #ccc;
+	display:inline-block;
+	margin: 2px;
+	padding: 4px;
+	background-color: #eee;
+	width: 60px;
+	height: 40px;
+	line-height: 2em;
+	vertical-align: middle;
+	text-align: center;
+	border-radius: 4px;
+}
+.cell {
+	display:inline-block;
+	vertical-align:top;
+}
+a {
+	color: #000;
+	text-decoration: none;
+}
+a:hover div {
+	border: 1px solid #aaa;
+}
+a:active div {
+	border: 1px inset #aaa;
+}
+.complex div { background-color: #edd; }
+.binary  div { background-color: #ddd; }
+.trig    div { background-color: #ded; }
+.digits  div { background-color: #ffb; }
+.base    div { background-color: #adf; }
+.op      div { background-color: #dee; }
+.part    div { background-color: #eee0d2; }
+.stack   div { background-color: #dce; }

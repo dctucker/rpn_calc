@@ -8,6 +8,7 @@ use App\OperandFactory;
 use App\Operand;
 use App\Operands\Scalar;
 use App\Operands\Complex;
+use App\Operands\PolarComplex;
 use App\Notations\Degrees;
 use App\Notations\Binary;
 use App\Notations\Octal;
@@ -23,7 +24,11 @@ interface UnaryScalar   extends ScalarOperator  { public function scalar(Scalar 
 interface BinaryScalar  extends ScalarOperator  { public function scalar(Scalar $s1, Scalar $s2); }
 interface UnaryComplex  extends ComplexOperator { public function complex(Complex $c); }
 interface BinaryComplex extends ComplexOperator { public function complex(Complex $c1, Complex $c2); }
-interface BinaryComplexScalar  extends ComplexOperator { public function scale(Complex $c, Scalar $s); }
+interface BinaryComplexScalar  extends ComplexOperator
+{
+	public function scalarComplex(Scalar $c, Complex $s);
+	public function complexScalar(Complex $c, Scalar $s);
+}
 
 abstract class UnaryOperator extends Operator implements UnaryScalar
 {
@@ -129,11 +134,15 @@ trait AddComplex
 		];
 	}
 
-	/**
-	 * add the given Scalar to the real part of the given Complex number
-	 * @return array data for constructing a new Complex
-	 */
-	public function scale(Complex $c, Scalar $s)
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return [
+			$this->scalar( $c->real, $s ),
+			$c->imag(),
+		];
+	}
+
+	public function scalarComplex(Scalar $s, Complex $c)
 	{
 		return [
 			$this->scalar( $s, $c->real ),
@@ -159,48 +168,52 @@ class Minus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 	}
 }
 
-trait ScaleComplex
-{
-	/**
-	 * multiply both components of the given Complex by the given Scalar
-	 * @return data for constructing a new Complex
-	 */
-	public function scale(Complex $c, Scalar $s)
-	{
-		return [
-			$this->scalar( $s, $c->real ),
-			$this->scalar( $s, $c->imag )
-		];
-	}
-}
-
 class Times extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
-	use ScaleComplex;
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
 		return $s1() * $s2();
 	}
 	public function complex(Complex $c1, Complex $c2)
 	{
-		$ac = $this->scalar( $c1->real, $c2->real );
-		$bd = $this->scalar( $c1->imag, $c2->imag );
-		$ad = $this->scalar( $c1->real, $c2->imag );
-		$bc = $this->scalar( $c1->imag, $c2->real );
+		$ac = $c1->real() * $c2->real();
+		$bd = $c1->imag() * $c2->imag();
+		$ad = $c1->real() * $c2->imag();
+		$bc = $c1->imag() * $c2->real();
 		return [
 			$ac - $bd ,
 			$ad + $bc ,
 		];
 	}
+	/**
+	 * multiply both components of the given Complex by the given Scalar
+	 * @return data for constructing a new Complex
+	 */
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return [
+			$this->scalar( $s, $c->real ),
+			$this->scalar( $s, $c->imag )
+		];
+	}
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
+		return new Complex( $this->complexScalar($c, $s) ); // commutative
+	}
 }
 class Divide extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
-	use ScaleComplex;
+	public function __construct($symbol)
+	{
+		parent::__construct($symbol);
+		$this->times = OperatorFactory::make('*');
+		$this->recip = OperatorFactory::make('1/x');
+	}
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
 		if( $s2() == 0 )
 			return NAN;
-		return $s1() / $s2();
+		return $this->times( $s1(), $this->recip( $s2() ) );
 	}
 
 	public function complex(Complex $c1, Complex $c2)
@@ -217,6 +230,17 @@ class Divide extends BinaryOperator implements BinaryComplex, BinaryComplexScala
 			($ac + $bd) / ($cc + $dd),
 			($bc - $ad) / ($cc + $dd)
 		];
+	}
+
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
+		$ret = $this->times->complexScalar( $this->recip( $c ), $s );
+		return new Complex( $ret[0], $ret[1] );
+	}
+
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return $this->times->complexScalar( $c, $this->recip( $s ) );
 	}
 }
 class Reciprocal extends UnaryOperator implements UnaryComplex
@@ -372,20 +396,26 @@ class BShiftRight extends BinaryOperator
 
 // exponentation operations
 
-class Power extends BinaryOperator implements BinaryComplexScalar
+class Power extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
 		return $s1() ** $s2(); // y^x, not x^y
 	}
-	public function scale(Complex $c, Scalar $s)
+	public function complex(Complex $c1, Complex $c2)
 	{
-		$mag = $c->mag() ** $s();
-		$arg = $c->arg();
-		return [
-			$mag * cos( $s() * $arg ),
-			$mag * sin( $s() * $arg ),
-		];
+ 		$aabb = $c1->real() ** 2 + $c1->imag() ** 2;
+		$mag = $aabb ** ($c2->real() / 2) * exp( -$c2->imag() * $c1->arg() );
+		$arg = $c2->real() * $c1->arg() + 0.5 * $c2->imag() * log( $aabb );
+		return new PolarComplex($mag, $arg);
+	}
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return $this->complex( $c, new Complex( $s, OperandFactory::make('0') ) );
+	}
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
+		return new Complex( $this->complex( OperandFactory::make($s().'+0i'), $c ) );
 	}
 }
 class Sqrt extends UnaryOperator implements UnaryComplex
@@ -434,12 +464,15 @@ class NthLog extends BinaryOperator implements BinaryComplexScalar
 	{
 		return log( $s1(), $s2() );
 	}
-	public function scale(Complex $c, Scalar $s)
+	public function complexScalar(Complex $c, Scalar $s)
 	{
 		return [
 			log( $c->mag() ) / log( $s() ),
 			$c->arg() / log( $s() )
 		];
+	}
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
 	}
 }
 

@@ -34,6 +34,9 @@ class OperandTest extends TestCase
 		$operand->setValue(0x33);
 		$this->assertEquals(0x33, $operand->getValue());
 
+		$operand = OperandFactory::make("0deg");
+		$operand->setValue(M_PI);
+		$this->assertEquals(M_PI, $operand->getValue());
 
 		$operand = OperandFactory::make('1+2i');
 		$this->assertEquals([1,2], $operand->getValue());

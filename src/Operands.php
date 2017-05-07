@@ -33,13 +33,12 @@ abstract class Scalar extends Operand
 	public function operate(Operator $op, $other = null)
 	{
 		if( $other instanceof Complex )
-			return $other->operate( $op, $this );
+			$ret = $op->scalarComplex( $this, $other );
 
 		if( $op->num_operands == 1 )
 			$ret = $op->scalar( $this );
-		else
+		elseif( $other instanceof Scalar )
 		{
-			assert( $other instanceof Scalar );
 			$ret = $op->scalar( $this, $other );
 		}
 
@@ -108,12 +107,17 @@ class Complex extends Operand
 
 	/**
 	 * initialize this Complex real and imag components, and default format
-	 * @param $real Scalar or double - defaults to zero
+	 * @param $real mixed
 	 * @param $imag Scalar or double - defaults to one
 	 */
 	public function __construct($real, $imag=1)
 	{
-		if( is_string( $real ) )
+		if( is_array( $real ) )
+		{
+			$this->real = new DecScalar( $real[0] );
+			$this->imag = new DecScalar( $real[1] );
+		}
+		elseif( is_string( $real ) )
 		{
 			$this->setValue( $real );
 		}
@@ -149,19 +153,6 @@ class Complex extends Operand
 
 	public function __toString()
 	{
-		if( $this->format == 'rectangular' )
-			return $this->rectangular();
-		elseif( $this->format == 'polar' )
-			return $this->polar();
-
-		return $this->real .','. $this->imag . 'i';
-	}
-
-	/**
-	 * @return string e.g. 4+5i
-	 */
-	public function rectangular()
-	{
 		if( $this->real() == 0 )
 		{
 			if( $this->imag() == 1 )
@@ -180,15 +171,6 @@ class Complex extends Operand
 		elseif( $this->imag() != 0 )
 			$str .= ($this->imag() >= 0 ? '+' : '').$this->imag."i";
 		return $str;
-	}
-
-	/**
-	 * polar representation in degrees of this complex vector
-	 * @return string e.g. 3.6055exp45deg
-	 */
-	public function polar()
-	{
-		return $this->mag()."exp".rad2deg($this->arg())."deg";
 	}
 
 	/**
@@ -228,7 +210,7 @@ class Complex extends Operand
 		{
 			if( $op->implements('BinaryComplexScalar') )
 			{
-				$complex = $op->scale( $this, $other );
+				$complex = $op->complexScalar( $this, $other );
 			}
 		}
 
@@ -239,5 +221,22 @@ class Complex extends Operand
 			return $complex;
 
 		return new Complex( new DecScalar($complex[0]), new DecScalar($complex[1]) );
+	}
+}
+
+class PolarComplex extends Complex
+{
+	public function __construct($mag, $arg)
+	{
+		$real = $mag * cos( $arg );
+		$imag = $mag * sin( $arg );
+		if( abs($real) < 1e-10 ) $real = 0;
+		if( abs($imag) < 1e-10 ) $imag = 0;
+		parent::__construct( $real, $imag );
+	}
+
+	public function __toString()
+	{
+		return $this->mag()."e^".rad2deg($this->arg())."deg*i";
 	}
 }
