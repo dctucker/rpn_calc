@@ -49,6 +49,11 @@ abstract class Scalar extends Operand
 		$scalar->setValue($ret);
 		return $scalar;
 	}
+
+	public function bnot()
+	{
+		return ~ $this();
+	}
 }
 
 abstract class BaseScalar extends Scalar

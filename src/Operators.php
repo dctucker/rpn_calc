@@ -374,9 +374,7 @@ class BNot extends UnaryOperator
 {
 	public function scalar(Scalar $s)
 	{
-		if( $s instanceof BaseScalar )
-			return $s->bnot();
-		return ~ $s();
+		return $s->bnot();
 	}
 }
 
