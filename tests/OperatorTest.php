@@ -159,6 +159,9 @@ class OperatorTest extends TestCase
 		$this->assertEquals([-6,0], OperatorFactory::make('*')->complex(O("2i"),O("3i")));
 		$this->assertEquals([2/3,0], OperatorFactory::make('/')->complex(O("2i"),O("3i")));
 
+		$this->assertEquals(O('2-3i'), OperatorFactory::make('-')->scalarComplex(O("2"),O("3i")));
+		$this->assertEquals([-3,2], OperatorFactory::make('-')->complexScalar(O("2i"),O("3")));
+
 		$ret = OperatorFactory::make('/')->complex(O("2i"),O("0i"));
 		$this->assertNotEmpty( $ret );
 		$this->assertNan( $ret[0] );

@@ -134,22 +134,6 @@ trait AddComplex
 			$this->scalar( $c1->imag, $c2->imag )
 		];
 	}
-
-	public function complexScalar(Complex $c, Scalar $s)
-	{
-		return [
-			$this->scalar( $c->real, $s ),
-			$c->imag(),
-		];
-	}
-
-	public function scalarComplex(Scalar $s, Complex $c)
-	{
-		return new Complex([
-			$this->scalar( $s, $c->real ),
-			$c->imag(),
-		]);
-	}
 }
 
 class Plus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
@@ -159,6 +143,20 @@ class Plus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 	{
 		return $s1() + $s2();
 	}
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return [
+			$c->real() + $s(),
+			$c->imag(),
+		];
+	}
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
+		return new Complex([
+			$s() + $c->real(),
+			$c->imag(),
+		]);
+	}
 }
 class Minus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 {
@@ -166,6 +164,20 @@ class Minus extends BinaryOperator implements BinaryComplex, BinaryComplexScalar
 	public function scalar(Scalar $s1, Scalar $s2)
 	{
 		return $s1() - $s2();
+	}
+	public function complexScalar(Complex $c, Scalar $s)
+	{
+		return [
+			$c->real() - $s(),
+			$c->imag(),
+		];
+	}
+	public function scalarComplex(Scalar $s, Complex $c)
+	{
+		return new Complex([
+			$s() - $c->real(),
+			- $c->imag(),
+		]);
 	}
 }
 
