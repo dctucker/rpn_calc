@@ -147,6 +147,9 @@ class OperatorTest extends TestCase
 		$deg180 = O('180deg');
 		$this->assertEquals(     M_PI, OperatorFactory::make('deg')->scalar($deg180)());
 		$this->assertEquals(     M_PI, OperatorFactory::make('rad')->scalar($deg180)());
+
+		$this->assertEquals( O("-26"), OperatorFactory::make('not')( O("25") ) );
+		$this->assertEquals( O("0xfe"), OperatorFactory::make('not')( O("0x01") ) );
 	}
 
 	public function testComplexMethods()

@@ -7,6 +7,7 @@ use App\Operator;
 use App\OperandFactory;
 use App\Operand;
 use App\Operands\Scalar;
+use App\Operands\BaseScalar;
 use App\Operands\Complex;
 use App\Operands\PolarComplex;
 use App\Notations\Degrees;
@@ -283,7 +284,7 @@ class Modulo extends BinaryOperator
 	{
 		if( $s2() == 0 )
 			return NAN;
-		return $s1() % $s2();
+		return fmod( $s1(), $s2() );
 	}
 }
 
@@ -373,6 +374,8 @@ class BNot extends UnaryOperator
 {
 	public function scalar(Scalar $s)
 	{
+		if( $s instanceof BaseScalar )
+			return $s->bnot();
 		return ~ $s();
 	}
 }

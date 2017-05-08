@@ -55,13 +55,24 @@ abstract class BaseScalar extends Scalar
 {
 	public function getValue()
 	{
-		$raw_part = $this->symbol; //substr( $this->symbol, strlen(static::$prefix) );
-		return base_convert( $raw_part, static::$base, 10 ) * 1;
+		list( $full, $sign, $prefix, $value ) = static::regex( $this->symbol );
+		return ($sign.base_convert( $value, static::$base, 10 )) * 1;
 	}
 
 	public function setValue($value)
 	{
 		$this->symbol = $this->baseSymbol( $value );
+	}
+
+	public function bnot()
+	{
+		$base_width = strlen($this->symbol) - strlen(static::$prefix);
+		$bin_width = ceil(log(static::$base ** $base_width, 2));
+		$mask = (( 1 << $bin_width ) - 1);
+		$base_class = get_class($this);
+		$negated = base_convert( ~ $this() & $mask, 10, static::$base );
+		$symbol = static::$prefix.str_pad( $negated, $base_width, '0', STR_PAD_LEFT);
+		return new $base_class( $symbol );
 	}
 }
 

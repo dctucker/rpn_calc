@@ -81,4 +81,11 @@ class OperandTest extends TestCase
 		$this->assertEquals( "4cis90deg", $polar );
 	}
 
+
+	public function testBaseBooleanNot()
+	{
+		$this->assertEquals( O('0xff'), O('0x00')->bnot() );
+		$this->assertEquals( O('b1010'), O('b0101')->bnot() );
+		$this->assertEquals( O('o03'), O('o74')->bnot() );
+	}
 }

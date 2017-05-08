@@ -79,7 +79,8 @@ trait Base
 	 */
 	public function baseSymbol($integer)
 	{
-		return static::$prefix.base_convert( $integer, 10, static::$base );
+		$sign = ( $integer < 0 ) ? '-' : '';
+		return $sign.static::$prefix.base_convert( abs($integer), 10, static::$base );
 	}
 
 	public static function pattern()
@@ -94,7 +95,7 @@ trait Base
 		{
 			$chars .= static::$base - 1;
 		}
-		return "/^".static::$prefix."[$chars]+$/";
+		return "/^(-?)(".static::$prefix.")([$chars]+)$/";
 	}
 }
 
